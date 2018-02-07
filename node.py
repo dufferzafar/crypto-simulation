@@ -1,4 +1,7 @@
 
+from block import Block
+
+
 class Node(object):
 
     def __init__(self, node_id, initial_coins, is_fast):
@@ -10,8 +13,21 @@ class Node(object):
         # NOTE: What is this for?
         self.receivedStamps = []
 
-        # Stores references to other node objects
+        # List of this node's neighbours
         self.peers = []
+
+        # List of all blocks this node has seen
+        # (can be thought of as a tree using prev_block attribute of a block)
+        self.blocks = [
+
+            # Each node begins with a genesis block
+            Block(block_id=0, created_at=0.0, creator_id=self.id, prev_block_id=-1)
+
+        ]
+
+        # List of transactions this node has seen
+        # NOTE: Not really sure if this is really required
+        self.transactions = []
 
         # TODO: Each node should have a random number of peers connected
         # import random
