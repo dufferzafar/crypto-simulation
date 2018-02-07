@@ -18,6 +18,12 @@ class Simulator(object):
         # TODO: Populate nodes with random initial coins and fast/slow type
         self.nodes = []
 
+        # TODO: Set random peers of each node
+
+        # TODO: Set propagation delays between each pair of nodes
+
+        # TODO: Seed the events queue with BlockGenerate & TransactionGenerate events
+
         # Current time of the simulation
         self.curr_time = 0
 
