@@ -1,16 +1,18 @@
 
 class Block(object):
 
-    def __init__(self, block_id, created_at, prev_block_id, creator_id):
+    def __init__(self, block_id, created_at, creator_id, prev_block_id):
         super(Block, self).__init__()
 
         # TODO: Should this be passed from outside or auto-incremented by us?
         self.id = block_id
         self.created_at = created_at
 
+        # Node that created this block
+        self.creator_id = creator_id
+
         # This link helps create a chain of blocks
         self.prev_block_id = prev_block_id
-        self.creator_id = creator_id
 
         # Contains a dict of Transactions
         self.transactions = {}
