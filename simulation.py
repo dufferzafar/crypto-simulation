@@ -1,5 +1,5 @@
 from queue import PriorityQueue
-from random import randrange
+import random
 
 from node import Node
 
@@ -24,7 +24,13 @@ class Simulator(object):
         # Care needs to be taken to ensure that the resulting graph is connected
         # So every node can send messages to every other node
 
-        # TODO: Set propagation delays between each pair of nodes
+        # Set propagation delays between each pair of nodes
+        self.prop_delay = [
+            # From assignment:
+            # Pij can be chosen from a uniform distribution between 10ms and 500ms
+            [random.uniform(10, 501) / 1000 for _ in range(0, n)]
+            for _ in range(0, n)
+        ]
 
         # TODO: Seed the events queue with BlockGenerate & TransactionGenerate events
 
@@ -35,12 +41,12 @@ class Simulator(object):
         """Create n nodes z% of which are slow."""
 
         slow_nodes = [
-            Node(node_id=i, initial_coins=randrange(1, 10), is_fast=False)
+            Node(node_id=i, initial_coins=random.randrange(11, 31), is_fast=False)
             for i in range(0, int(n * z))
         ]
 
         fast_nodes = [
-            Node(node_id=i, initial_coins=randrange(1, 10), is_fast=True)
+            Node(node_id=i, initial_coins=random.randrange(11, 31), is_fast=True)
             for i in range(int(n * z), n)
         ]
 
