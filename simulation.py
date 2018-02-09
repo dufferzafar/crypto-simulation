@@ -60,13 +60,3 @@ class Simulator(object):
             ev_count += 1
 
         return ev_count
-
-
-if __name__ == '__main__':
-
-    # TODO: Take input from user
-
-    sim = Simulator(10, 0.7)
-    c = sim.run(until=4)
-
-    print("%d events were run." % c)
