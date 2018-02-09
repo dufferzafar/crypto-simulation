@@ -32,3 +32,7 @@ class Node(object):
         # TODO: Each node should have a random number of peers connected
         # import random
         # self.peers = random.sample(all_nodes, k)
+
+    def __repr__(self):
+        r = (self.id, self.coins, ("fast" if self.is_fast else "slow"))
+        return "<Node %d:, coins=%d, %s>" % r
