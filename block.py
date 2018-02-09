@@ -17,13 +17,21 @@ class Block(object):
         # Contains a dict of Transactions
         self.transactions = {}
 
+    def __repr__(self):
+        r = (self.id, self.prev_block_id)
+        return "<Block %d: prev=%d>" % r
+
 
 class Transaction(object):
 
-    def __init__(self, trans_id, from_id, to_id, amount):
+    def __init__(self, trans_id, from_id, to_id, coins):
         super(Block, self).__init__()
 
-        self.trans_id = trans_id
+        self.id = trans_id
         self.from_id = from_id
         self.to_id = to_id
-        self.amount = amount
+        self.coins = coins
+
+    def __repr__(self):
+        r = (self.id, self.from_id, self.to_id, self.coins)
+        return "<Trans %d: from=%d, to=%d, coins=%d>" % r
