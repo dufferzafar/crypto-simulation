@@ -66,3 +66,33 @@ class Simulator(object):
             ev_count += 1
 
         return ev_count
+
+    def latency(self, a, b, msg_size_mb=0):
+        """Return latency between nodes a & b."""
+
+        i, j = self.nodes.index(a), self.nodes.index(b)
+
+        # Propagation delays p_ij chosen at start of simulation
+        p = self.prop_delay[i][j]
+
+        # TODO: Deal with varying msg_size_mb!
+        # for a msg of only 1 transaction: assume that |m| = 0
+        # for a msg of a block: assume that |m| = 1 MB (8 × 10**6 b)
+        m = msg_size_mb * 8 * (10 ** 6)
+
+        # c_ij is set to 100 Mbps if both i and j are fast
+        if a.is_fast and b.is_fast:
+            c = 100 * (10 ** 6)
+        # and 5 Mbps if either is slow
+        else:
+            c = 5 * (10 ** 6)
+
+        # mean of d_ij is set equal to 96kbit/c_ij
+        d_mean = 12 * 8 * (10 ** 3) / c
+
+        # d_ij is the queuing delay on the path
+        # randomly chosen from an exponential distribution with above mean
+        d = random.expovariate(1 / d_mean)
+
+        # latency is of the form p_ij + |m|/c_ij + d_ij
+        return (p + m / c + d)
