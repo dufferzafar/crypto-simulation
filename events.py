@@ -101,6 +101,34 @@ class BlockGenerate(Event):
         super(self).__init__(**kwargs)
 
     def run(sim):
+        flag = False
+        for x in self.node_id.receivedStamps:
+            if x > self.run_at
+                flag = True
+
+        if not flag:
+            leng = 0
+            blk = None
+            for x in self.node_id.blocks:
+                if x.len > leng:
+                    leng = x.len
+                    blk = x
+                    break
+
+            newblk = Block(s.block_id,self.run_at,self.node_id,blk,leng+1)
+            for x in self.node_id.transactions:
+                if x in blk.transactions:
+                    self.node_id.transactions.remove(x)
+                else
+                    newblk.transactions.append(x)
+
+            self.node_id.blocks.append(newblk)
+            for peer_id in self.node_id.peers:
+                #lmbd = 10;
+                if peer_id != block.creator_id:
+                    t = sim.prop_delay[self.node_id][peer_id]
+                    nextEvent = BlockReceive(newblk,peer_id,self.node_id,self.run_at,self.run_at+t)
+                    sim.events.append(nextEvent)
         raise NotImplementedError
 
 
@@ -112,4 +140,34 @@ class BlockReceive(Event):
         self.block = block
 
     def run(sim):
+        #@ankit
+        flag = False
+        for x in self.node_id.blocks:
+            if x.block_id == self.block.block_id:
+                flag = True
+
+        if not flag:
+            blk = None
+            for x in self.node_id.blocks:
+                if x.block_id == self.block.block_id:
+                    blk = x
+                    break
+
+            newblk = Block(block.block_id,block.created_at,block.creator_id,blk.block_id)
+            newblk.len += 1
+            self.node_id.blocks.append(newblk)
+            self.node_id.receivedStamps.append(newblk.created_at)
+
+            for peer_id in self.node_id.peers:
+                #lmbd = 10;
+                if peer_id != block.creator_id:
+                    t = sim.prop_delay[self.node_id][peer_id]
+                    nextEvent = BlockReceive(self.block,peer_id,self.node_id,self.run_at,self.run_at+t)
+                    sim.events.append(nextEvent)
+
+            #Do we need a schedule time value to be passed as well.
+            lmbd = 10;
+            t = math.log(1-random.uniform(0,1))/(-lmbd)
+            nextEvent = BlockGenerate(self.node_id,self.node_id,self.run_at,self.run_at+t)
+            sim.events.append(nextEvent)
         raise NotImplementedError
