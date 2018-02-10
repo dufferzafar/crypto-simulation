@@ -50,7 +50,7 @@ class TransactionGenerate(Event):
         self.node_id.coins -= transAmt
         toid.coins += transAmt
         newTrans = Transaction(sim.trans_id,self.node_id,toid,transAmt)
-        sim.trans_id++
+        sim.trans_id += 1
         self.transactions.append(newTrans)
 
         #add parameter lmbd to simulator for poisson distribution.value 10
