@@ -1,6 +1,6 @@
 
 from block import Block, Transaction
-
+import random
 
 class Event(object):
 
@@ -39,8 +39,32 @@ class TransactionGenerate(Event):
         # Create next transaction events for this node
         # Create next transaction events for neighbours
 
-        raise NotImplementedError
+        #@ankit
+        toid = -1;
+        while(toid == self.node_id):
+            toid = randint(0,sim.n)
 
+        factor = random.uniform(0,1)
+        transAmt = self.node_id.coins*factor
+        #need to add trans_id variable to simulator object.initial value 0
+        self.node_id.coins -= transAmt
+        toid.coins += transAmt
+        newTrans = Transaction(sim.trans_id,self.node_id,toid,transAmt)
+        sim.trans_id++
+        self.transactions.append(newTrans)
+
+        #add parameter lmbd to simulator for poisson distribution.value 10
+        lmbd = 10;
+        t = math.log(1-random.uniform(0,1))/(-lmbd)
+        nextEvent = TransactionGenerate(self.node_id,self.node_id,self.run_at,self.run_at+t)
+        sim.events.append(nextEvent)
+
+        for peer_id in self.node_id.peers:
+            #lmbd = 10;
+            t = sim.prop_delay[self.node_id][peer_id]
+            nextEvent = TransactionReceive(newTrans,peer_id,self.node_id,self.run_at,self.run_at+t)
+            sim.events.append(nextEvent)
+        raise NotImplementedError
 
 class TransactionReceive(Event):
 
@@ -54,6 +78,19 @@ class TransactionReceive(Event):
         # Check if this node has already seen this transaction before
         # If not, then add it to it's list
         # And generate TransactionReceive events for all its neighbours
+
+        #@ankit
+        flag = False
+        for x in self.node_id.transactions:
+            if x.trans_id == self.transaction.trans_id:
+                flag = True
+        if not flag:
+            self.node_id.transactions.append(self.transaction)
+            for peer_id in self.node_id.peers:
+                #lmbd = 10;
+                t = sim.prop_delay[self.node_id][peer_id]
+                nextEvent = TransactionReceive(self.transaction,peer_id,self.node_id,self.run_at,self.run_at+t)
+                sim.events.append(nextEvent)
 
         raise NotImplementedError
 
