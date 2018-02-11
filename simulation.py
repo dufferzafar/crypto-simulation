@@ -96,3 +96,20 @@ class Simulator(object):
 
         # latency is of the form p_ij + |m|/c_ij + d_ij
         return (p + m / c + d)
+
+    # @ Avinash 
+    # function which create a file for given node id 
+    # parameters node object = node and file handler = fh
+
+    def printblockchain(node,fh):
+
+        for x in node.blocks:
+            if x.prev_block_id != -1:
+                line = str(x.prev_block_id)+"->"+str(x.block_id)+"\n"
+                fh.write(line)
+
+        fh.write("\n")
+
+        for x in node.blocks:
+            line = str(x.block_id)+":"+str(x.created_at)
+            fh.write(line)
