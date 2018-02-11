@@ -54,14 +54,14 @@ class TransactionGenerate(Event):
         self.transactions.append(newTrans)
 
         #add parameter lmbd to simulator for poisson distribution.value 10
-        lmbd = 10;
+        lmbd = self.node_id.lmbd;
         t = math.log(1-random.uniform(0,1))/(-lmbd)
         nextEvent = TransactionGenerate(self.node_id,self.node_id,self.run_at,self.run_at+t)
         sim.events.append(nextEvent)
 
         for peer_id in self.node_id.peers:
             #lmbd = 10;
-            t = sim.prop_delay[self.node_id][peer_id]
+            t = sim.latency(self.node_id,peer_id,1);
             nextEvent = TransactionReceive(newTrans,peer_id,self.node_id,self.run_at,self.run_at+t)
             sim.events.append(nextEvent)
         raise NotImplementedError
@@ -88,7 +88,7 @@ class TransactionReceive(Event):
             self.node_id.transactions.append(self.transaction)
             for peer_id in self.node_id.peers:
                 #lmbd = 10;
-                t = sim.prop_delay[self.node_id][peer_id]
+                t = sim.latency(self.node_id,peer_id,1);
                 nextEvent = TransactionReceive(self.transaction,peer_id,self.node_id,self.run_at,self.run_at+t)
                 sim.events.append(nextEvent)
 
@@ -117,16 +117,19 @@ class BlockGenerate(Event):
 
             newblk = Block(s.block_id,self.run_at,self.node_id,blk,leng+1)
             for x in self.node_id.transactions:
-                if x in blk.transactions:
-                    self.node_id.transactions.remove(x)
-                else
-                    newblk.transactions.append(x)
+                prevblk = blk;
+                while (prevblk.block_id != 0):
+                    if x in prevblk.transactions:
+                        self.node_id.transactions.remove(x)
+                    prevblk = prevblk.prev_block_id
 
+            newblk.transactions.extend(self.node_id.transactions)
             self.node_id.blocks.append(newblk)
+            self.node_id.coins += 50
             for peer_id in self.node_id.peers:
                 #lmbd = 10;
                 if peer_id != block.creator_id:
-                    t = sim.prop_delay[self.node_id][peer_id]
+                    t = sim.latency(self.node_id,peer_id,1);
                     nextEvent = BlockReceive(newblk,peer_id,self.node_id,self.run_at,self.run_at+t)
                     sim.events.append(nextEvent)
         raise NotImplementedError
@@ -161,12 +164,12 @@ class BlockReceive(Event):
             for peer_id in self.node_id.peers:
                 #lmbd = 10;
                 if peer_id != block.creator_id:
-                    t = sim.prop_delay[self.node_id][peer_id]
+                    t = sim.latency(self.node_id,peer_id,1);
                     nextEvent = BlockReceive(self.block,peer_id,self.node_id,self.run_at,self.run_at+t)
                     sim.events.append(nextEvent)
 
             #Do we need a schedule time value to be passed as well.
-            lmbd = 10;
+            lmbd = self.node_id.lmbd;
             t = math.log(1-random.uniform(0,1))/(-lmbd)
             nextEvent = BlockGenerate(self.node_id,self.node_id,self.run_at,self.run_at+t)
             sim.events.append(nextEvent)
