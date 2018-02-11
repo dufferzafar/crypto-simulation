@@ -111,5 +111,5 @@ class Simulator(object):
         fh.write("\n")
 
         for x in node.blocks:
-            line = str(x.block_id)+":"+str(x.created_at)
+            line = str(x.block_id)+":"+str(x.created_at)+"\n"
             fh.write(line)
