@@ -21,7 +21,7 @@ class Node(object):
         self.blocks = [
 
             # Each node begins with a genesis block
-            Block(block_id=0, created_at=0.0, creator_id=self.id, prev_block_id=-1)
+            Block(block_id=0, created_at=0.0, creator_id=self.id, prev_block_id=-1,0)
 
         ]
 
