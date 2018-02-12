@@ -1,7 +1,7 @@
 
 class Block(object):
 
-    def __init__(self, block_id, created_at, creator_id, prev_block_id):
+    def __init__(self, block_id, created_at, creator_id, prev_block_id,leng):
         super(Block, self).__init__()
 
         # TODO: Should this be passed from outside or auto-incremented by us?
@@ -17,6 +17,8 @@ class Block(object):
         # Contains a dict of Transactions
         self.transactions = {}
 
+        # Length of the chain this block is part of
+        self.len = leng;
     def __repr__(self):
         r = (self.id, self.prev_block_id)
         return "<Block %d: prev=%d>" % r
