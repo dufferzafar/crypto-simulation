@@ -133,7 +133,7 @@ class Simulator(object):
         for node in self.nodes:
             fh = open("../output/"+str(node.id)+str(node.is_fast)+".txt","w+")
             for block in node.blocks:
-                if x.prev_block_id != -1:
+                if block.prev_block_id != -1:
                     line = str(block.prev_block_id)+"->"+str(block.block_id)+"\n"
                     fh.write(line)
 
