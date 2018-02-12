@@ -125,18 +125,20 @@ class Simulator(object):
         # latency is of the form p_ij + |m|/c_ij + d_ij
         return (p + m / c + d)
     # @ Avinash 
-    # function which create a file for given node id
-    # parameters node object = node and file handler = fh
+    # function which create files of the particular simulation
 
-    def printblockchain(node,fh):
 
-        for x in node.blocks:
-            if x.prev_block_id != -1:
-                line = str(x.prev_block_id)+"->"+str(x.block_id)+"\n"
+    def printblockchain(self):
+
+        for node in self.nodes:
+            fh = open("../output/"+str(node.id)+str(node.is_fast)+".txt","w+")
+            for block in node.blocks:
+                if x.prev_block_id != -1:
+                    line = str(block.prev_block_id)+"->"+str(block.block_id)+"\n"
+                    fh.write(line)
+
+            fh.write("\n")
+            for block in node.blocks:
+                line = str(block.block_id)+":"+str(block.created_at)
                 fh.write(line)
-
-        fh.write("\n")
-
-        for x in node.blocks:
-            line = str(x.block_id)+":"+str(x.created_at)+"\n"
-            fh.write(line)
+            fh.close()
