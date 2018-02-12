@@ -8,7 +8,7 @@ class Event(object):
         super(Block, self).__init__()
 
         # Node this event will happen on
-        self.node_id = node_id
+        sim.nodes[self.node_id].id = node_id
 
         # Node that created this event
         self.creator_id = creator_id
@@ -41,28 +41,28 @@ class TransactionGenerate(Event):
 
         #@ankit
         toid = -1;
-        while(toid == self.node_id):
-            toid = randint(0,sim.n)
+        while(toid == sim.nodes[self.node_id].id):
+            toid = randint(0,sim.n-1)
 
         factor = random.uniform(0,1)
-        transAmt = self.node_id.coins*factor
+        transAmt = sim.nodes[self.node_id].coins*factor
         #need to add trans_id variable to simulator object.initial value 0
-        self.node_id.coins -= transAmt
+        sim.nodes[self.node_id].coins -= transAmt
         toid.coins += transAmt
-        newTrans = Transaction(sim.trans_id,self.node_id,toid,transAmt)
+        newTrans = Transaction(sim.trans_id,sim.nodes[self.node_id].id,toid,transAmt)
         sim.trans_id += 1
         self.transactions.append(newTrans)
 
         #add parameter lmbd to simulator for poisson distribution.value 10
-        lmbd = self.node_id.lmbd;
+        lmbd = sim.nodes[self.node_id].lmbd;
         t = math.log(1-random.uniform(0,1))/(-lmbd)
-        nextEvent = TransactionGenerate(self.node_id,self.node_id,self.run_at,self.run_at+t)
+        nextEvent = TransactionGenerate(sim.nodes[self.node_id].id,sim.nodes[self.node_id].id,self.run_at,self.run_at+t)
         sim.events.append(nextEvent)
 
-        for peer_id in self.node_id.peers:
+        for peer_id in sim.nodes[self.node_id].peers:
             #lmbd = 10;
-            t = sim.latency(self.node_id,peer_id,1);
-            nextEvent = TransactionReceive(newTrans,peer_id,self.node_id,self.run_at,self.run_at+t)
+            t = sim.latency(sim.nodes[self.node_id].id,peer_id,1);
+            nextEvent = TransactionReceive(newTrans,peer_id,sim.nodes[self.node_id].id,self.run_at,self.run_at+t)
             sim.events.append(nextEvent)
         raise NotImplementedError
 
@@ -81,15 +81,15 @@ class TransactionReceive(Event):
 
         #@ankit
         flag = False
-        for x in self.node_id.transactions:
+        for x in sim.nodes[self.node_id].transactions:
             if x.trans_id == self.transaction.trans_id:
                 flag = True
         if not flag:
-            self.node_id.transactions.append(self.transaction)
-            for peer_id in self.node_id.peers:
+            sim.nodes[self.node_id].transactions.append(self.transaction)
+            for peer_id in sim.nodes[self.node_id].peers:
                 #lmbd = 10;
-                t = sim.latency(self.node_id,peer_id,1);
-                nextEvent = TransactionReceive(self.transaction,peer_id,self.node_id,self.run_at,self.run_at+t)
+                t = sim.latency(sim.nodes[self.node_id].id,peer_id,1);
+                nextEvent = TransactionReceive(self.transaction,peer_id,sim.nodes[self.node_id].id,self.run_at,self.run_at+t)
                 sim.events.append(nextEvent)
 
         raise NotImplementedError
@@ -102,35 +102,36 @@ class BlockGenerate(Event):
 
     def run(sim):
         flag = False
-        for x in self.node_id.receivedStamps:
+        for x in sim.nodes[self.node_id].receivedStamps:
             if x > self.run_at
                 flag = True
 
         if not flag:
             leng = 0
             blk = None
-            for x in self.node_id.blocks:
+            for x in sim.nodes[self.node_id].blocks:
                 if x.len > leng:
                     leng = x.len
                     blk = x
                     break
 
-            newblk = Block(s.block_id,self.run_at,self.node_id,blk,leng+1)
-            for x in self.node_id.transactions:
+            newblk = Block(sim.block_id,self.run_at,sim.nodes[self.node_id].id,blk,leng+1)
+            sim.block_id += 1
+            for x in sim.nodes[self.node_id].transactions:
                 prevblk = blk;
                 while (prevblk.block_id != 0):
                     if x in prevblk.transactions:
-                        self.node_id.transactions.remove(x)
+                        sim.nodes[self.node_id].transactions.remove(x)
                     prevblk = prevblk.prev_block_id
 
-            newblk.transactions.extend(self.node_id.transactions)
-            self.node_id.blocks.append(newblk)
-            self.node_id.coins += 50
-            for peer_id in self.node_id.peers:
+            newblk.transactions.extend(sim.nodes[self.node_id].transactions)
+            sim.nodes[self.node_id].blocks.append(newblk)
+            sim.nodes[self.node_id].coins += 50
+            for peer_id in sim.nodes[self.node_id].peers:
                 #lmbd = 10;
                 if peer_id != block.creator_id:
-                    t = sim.latency(self.node_id,peer_id,1);
-                    nextEvent = BlockReceive(newblk,peer_id,self.node_id,self.run_at,self.run_at+t)
+                    t = sim.latency(sim.nodes[self.node_id].id,peer_id,1);
+                    nextEvent = BlockReceive(newblk,peer_id,sim.nodes[self.node_id].id,self.run_at,self.run_at+t)
                     sim.events.append(nextEvent)
         raise NotImplementedError
 
@@ -145,32 +146,32 @@ class BlockReceive(Event):
     def run(sim):
         #@ankit
         flag = False
-        for x in self.node_id.blocks:
+        for x in sim.nodes[self.node_id].blocks:
             if x.block_id == self.block.block_id:
                 flag = True
 
         if not flag:
             blk = None
-            for x in self.node_id.blocks:
+            for x in sim.nodes[self.node_id].blocks:
                 if x.block_id == self.block.block_id:
                     blk = x
                     break
 
             newblk = Block(block.block_id,block.created_at,block.creator_id,blk.block_id)
             newblk.len += 1
-            self.node_id.blocks.append(newblk)
-            self.node_id.receivedStamps.append(newblk.created_at)
+            sim.nodes[self.node_id].blocks.append(newblk)
+            sim.nodes[self.node_id].receivedStamps.append(newblk.created_at)
 
-            for peer_id in self.node_id.peers:
+            for peer_id in sim.nodes[self.node_id].peers:
                 #lmbd = 10;
                 if peer_id != block.creator_id:
-                    t = sim.latency(self.node_id,peer_id,1);
-                    nextEvent = BlockReceive(self.block,peer_id,self.node_id,self.run_at,self.run_at+t)
+                    t = sim.latency(sim.nodes[self.node_id].id,peer_id,1);
+                    nextEvent = BlockReceive(self.block,peer_id,sim.nodes[self.node_id].id,self.run_at,self.run_at+t)
                     sim.events.append(nextEvent)
 
             #Do we need a schedule time value to be passed as well.
-            lmbd = self.node_id.lmbd;
+            lmbd = sim.nodes[self.node_id].lmbd;
             t = math.log(1-random.uniform(0,1))/(-lmbd)
-            nextEvent = BlockGenerate(self.node_id,self.node_id,self.run_at,self.run_at+t)
+            nextEvent = BlockGenerate(sim.nodes[self.node_id].id,sim.nodes[self.node_id].id,self.run_at,self.run_at+t)
             sim.events.append(nextEvent)
         raise NotImplementedError
