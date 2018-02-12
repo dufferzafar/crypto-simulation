@@ -20,9 +20,26 @@ class Simulator(object):
         # All nodes in the simulation
         self.nodes = self.create_nodes(n, z)
 
+        # Block id
+        self.block_id = 1;
+
+        # Transaction id
+        self.trans_id = 1;
+
         # TODO: Set random peers of each node
         # Care needs to be taken to ensure that the resulting graph is connected
         # So every node can send messages to every other node
+
+        #@ankit
+        adjmat = [[0 for x in range(n)] for y in range(n)]
+        for i in range(n):
+            count = randint(n/2,n-1)
+            for j in range(count):
+                adj = randint(0,n-1)
+                if adj not in nodes[i].peers:
+                    nodes[i].peers.append(adj)
+                if i not in nodes[adj].peers:
+                    nodes[adj].peers.append(i)
 
         # Set propagation delays between each pair of nodes
         self.prop_delay = [
@@ -33,7 +50,18 @@ class Simulator(object):
         ]
 
         # TODO: Seed the events queue with BlockGenerate & TransactionGenerate events
+        #@ankit
+        for i in range(n):
+            lmbd = nodes[i].lmbd;
+            t = math.log(1-random.uniform(0,1))/(-lmbd)
+            nextEvent = BlockGenerate(nodes[i].id,nodes[i].id,0,t)
+            events.append(nextEvent)
 
+        for i in range(n):
+            lmbd = nodes[i].lmbd;
+            t = math.log(1-random.uniform(0,1))/(-lmbd)
+            nextEvent = TransactionGenerate(nodes[i].id,nodes[i].id,0,t)
+            events.append(nextEvent)
         # Current time of the simulation
         self.curr_time = 0
 
@@ -96,9 +124,8 @@ class Simulator(object):
 
         # latency is of the form p_ij + |m|/c_ij + d_ij
         return (p + m / c + d)
-
     # @ Avinash 
-    # function which create a file for given node id 
+    # function which create a file for given node id
     # parameters node object = node and file handler = fh
 
     def printblockchain(node,fh):
