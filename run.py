@@ -9,9 +9,9 @@ if __name__ == '__main__':
     z = 0.3
 
     sim = Simulator(n, z)
-
+    print("here")
     print(sim.nodes)
 
-    # c = sim.run(until=4)
-
-    # print("%d events were run." % c)
+    c = sim.run(until=1)
+    print("%d events were run." % c)
+    sim.printblockchain()
