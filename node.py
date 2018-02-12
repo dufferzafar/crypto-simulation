@@ -21,7 +21,7 @@ class Node(object):
         self.blocks = [
 
             # Each node begins with a genesis block
-            Block(block_id=0, created_at=0.0, creator_id=self.id, prev_block_id=-1)
+            Block(block_id=0, created_at=0.0, creator_id=self.id, prev_block_id=-1,leng=0)
 
         ]
 
@@ -36,3 +36,8 @@ class Node(object):
     def __repr__(self):
         r = (self.id, self.coins, ("fast" if self.is_fast else "slow"))
         return "<Node %d:, coins=%d, %s>" % r
+
+    def get(self,blk_id):
+        for x in self.blocks:
+            if x.id == blk_id:
+                return x

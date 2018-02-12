@@ -2,7 +2,8 @@ from queue import PriorityQueue
 import random
 
 from node import Node
-
+from events import *
+import math
 
 class Simulator(object):
 
@@ -20,9 +21,29 @@ class Simulator(object):
         # All nodes in the simulation
         self.nodes = self.create_nodes(n, z)
 
+        # Block id
+        self.block_id = 1
+
+        # Transaction id
+        self.trans_id = 1
+
+        # Lambda value
+        self.lmbd = 10
+
         # TODO: Set random peers of each node
         # Care needs to be taken to ensure that the resulting graph is connected
         # So every node can send messages to every other node
+
+        #@ankit
+        adjmat = [[0 for x in range(n)] for y in range(n)]
+        for i in range(n):
+            count = random.randint(n/2,n-1)
+            for j in range(count):
+                adj = random.randint(0,n-1)
+                if adj not in self.nodes[i].peers:
+                    self.nodes[i].peers.append(adj)
+                if i not in self.nodes[adj].peers:
+                    self.nodes[adj].peers.append(i)
 
         # Set propagation delays between each pair of nodes
         self.prop_delay = [
@@ -33,7 +54,16 @@ class Simulator(object):
         ]
 
         # TODO: Seed the events queue with BlockGenerate & TransactionGenerate events
+        #@ankit
+        for i in range(n):
+            t = math.log(1-random.uniform(0,1))/(-self.lmbd)
+            nextEvent = BlockGenerate(self.nodes[i].id,self.nodes[i].id,0,t)
+            self.events.put(nextEvent)
 
+        for i in range(n):
+            t = math.log(1-random.uniform(0,1))/(-self.lmbd)
+            nextEvent = TransactionGenerate(self.nodes[i].id,self.nodes[i].id,0,t)
+            self.events.put(nextEvent)
         # Current time of the simulation
         self.curr_time = 0
 
@@ -64,6 +94,7 @@ class Simulator(object):
 
             self.curr_time = ev.run_at
             ev_count += 1
+            print("%d\n",self.curr_time)
 
         return ev_count
 
@@ -71,6 +102,13 @@ class Simulator(object):
         """Return latency between nodes a & b."""
 
         i, j = self.nodes.index(a), self.nodes.index(b)
+        # i = -1
+        # j = -1
+        # for x in range(self.n):
+        #     if self.nodes[x].id == a:
+        #         i = x
+        #     if self.nodes[x].id == b:
+        #         j = b
 
         # Propagation delays p_ij chosen at start of simulation
         p = self.prop_delay[i][j]
@@ -96,3 +134,21 @@ class Simulator(object):
 
         # latency is of the form p_ij + |m|/c_ij + d_ij
         return (p + m / c + d)
+    # @ Avinash
+    # function which create files of the particular simulation
+
+
+    def printblockchain(self):
+
+        for node in self.nodes:
+            fh = open("../output/"+str(node.id)+str(node.is_fast)+".txt","w+")
+            for block in node.blocks:
+                if block.prev_block_id != -1:
+                    line = str(block.prev_block_id)+"->"+str(block.id)+"\n"
+                    fh.write(line)
+
+            fh.write("\n")
+            for block in node.blocks:
+                line = str(block.id)+":"+str(block.created_at)+"\n"
+                fh.write(line)
+            fh.close()
