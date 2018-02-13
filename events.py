@@ -141,69 +141,67 @@ class BlockGenerate(Event):
         # Hi, this is me!
         me = sim.nodes[self.node_id]
 
-        # TODO: Learn what this is!
-        flag = False
+        # TODO: 0 - Learn why we need receivedStamps
         for x in me.receivedStamps:
             if x > self.run_at:
-                flag = True
+                return
 
-        if not flag:
-            # by_time = sorted(me.blocks.values(), key=lambda b: b.created_at)
-            # longest_blk = sorted(by_time, key=lambda b: b.chain_len)
+        # by_time = sorted(me.blocks.values(), key=lambda b: b.created_at)
+        # longest_blk = sorted(by_time, key=lambda b: b.chain_len)
 
-            # Find the block ending with the longest chain
-            longest_blk = me.blocks[0]
-            for bk in me.blocks.values():
+        # Find the block ending with the longest chain
+        longest_blk = me.blocks[0]
+        for bk in me.blocks.values():
 
-                # Use block creation time to break ties in case of equal length
-                if ((len(bk) > len(longest_blk)) or ((len(bk) == len(longest_blk)) and
-                                                     (bk.created_at < longest_blk.created_at))):
-                    longest_blk = bk
+            # Use block creation time to break ties in case of equal length
+            if ((len(bk) > len(longest_blk)) or ((len(bk) == len(longest_blk)) and
+                                                 (bk.created_at < longest_blk.created_at))):
+                longest_blk = bk
 
-            # TODO: Always keep all transactions
-            # but only add those to a block that are not already part of the longest chain
+        # TODO: Always keep all transactions
+        # but only add those to a block that are not already part of the longest chain
 
-            # Traverse the longest chain and find all transactions that've been spent
-            spent = set()
+        # Traverse the longest chain and find all transactions that've been spent
+        spent = set()
 
-            bk = longest_blk
-            while (bk.id != 0):  # Genesis blocks have id 0
+        bk = longest_blk
+        while (bk.id != 0):  # Genesis blocks have id 0
 
-                # https://stackoverflow.com/a/7692347/2043048
-                spent |= set(bk.transactions.values())
-                bk = me.blocks[bk.prev_block_id]
+            # https://stackoverflow.com/a/7692347/2043048
+            spent |= set(bk.transactions.values())
+            bk = me.blocks[bk.prev_block_id]
 
-            # Unspent = Seen - Spent
-            unspent_txns = set(me.transactions.values()) - spent
-            unspent_txns = {t.id: t for t in unspent_txns}
+        # Unspent = Seen - Spent
+        unspent_txns = set(me.transactions.values()) - spent
+        unspent_txns = {t.id: t for t in unspent_txns}
 
-            # Generate a new block
-            new_blk = Block(sim.block_id, self.run_at,
-                            me.id, longest_blk.id, len(longest_blk) + 1)
-            new_blk.transactions.update(unspent_txns)
+        # Generate a new block
+        new_blk = Block(sim.block_id, self.run_at,
+                        me.id, longest_blk.id, len(longest_blk) + 1)
+        new_blk.transactions.update(unspent_txns)
 
-            sim.block_id += 1
+        sim.block_id += 1
 
-            # Add the block to my chain
-            me.blocks[new_blk.id] = new_blk
+        # Add the block to my chain
+        me.blocks[new_blk.id] = new_blk
 
-            # And give me that sweet sweet mining reward!
-            me.coins += 50
+        # And give me that sweet sweet mining reward!
+        me.coins += 50
 
-            # Generate BlockReceive events for all my peers
-            for peer_id in me.peers:
+        # Generate BlockReceive events for all my peers
+        for peer_id in me.peers:
 
-                # Except who created the thing!
-                if peer_id != new_blk.creator_id:
-                    t = sim.latency(me, sim.nodes[peer_id], msg_type="block")
+            # Except who created the thing!
+            if peer_id != new_blk.creator_id:
+                t = sim.latency(me, sim.nodes[peer_id], msg_type="block")
 
-                    sim.events.put(BlockReceive(
-                        new_blk,
-                        peer_id,
-                        me.id,
-                        self.run_at,
-                        self.run_at + t
-                    ))
+                sim.events.put(BlockReceive(
+                    new_blk,
+                    peer_id,
+                    me.id,
+                    self.run_at,
+                    self.run_at + t
+                ))
 
 
 class BlockReceive(Event):
@@ -233,6 +231,8 @@ class BlockReceive(Event):
         # TODO: Why would I not have received the previous block?
         if prev_blk is None:
             return
+
+        # TODO: Add all seen transactions to my list of seen ones?
 
         # Make a copy of the block to increase the length
         new_blk = Block(
