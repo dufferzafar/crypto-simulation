@@ -34,6 +34,8 @@ class TransactionGenerate(Event):
         )
 
     def run(self, sim):
+        # all_but_me = set(sim.nodes) - set([sim.nodes[self.node_id]]);
+        # TODO: random.choice(all_but_me)
 
         # Find a random receiver who will receive the coins in the transaction
         toid = -1
@@ -61,28 +63,28 @@ class TransactionGenerate(Event):
 
         # Create a next transaction event for this node
         lmbd = sim.lmbd
+
+        # TODO: Create a separate function in sim for transaction_delay
         t = math.log(1 - random.uniform(0, 1)) / (-lmbd)
 
-        nextEvent = TransactionGenerate(
+        sim.events.put(TransactionGenerate(
             sim.nodes[self.node_id].id,
             sim.nodes[self.node_id].id,
             self.run_at,
             self.run_at + t
-        )
-        sim.events.put(nextEvent)
+        ))
 
         # Create next transaction events for neighbours
         for peer_id in sim.nodes[self.node_id].peers:
             t = sim.latency(sim.nodes[self.node_id], sim.nodes[peer_id], 1)
 
-            nextEvent = TransactionReceive(
+            sim.events.put(TransactionReceive(
                 newTrans,
                 peer_id,
                 sim.nodes[self.node_id].id,
                 self.run_at,
                 self.run_at + t
-            )
-            sim.events.put(nextEvent)
+            ))
 
 
 class TransactionReceive(Event):
