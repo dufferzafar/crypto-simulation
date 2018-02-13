@@ -148,18 +148,19 @@ class BlockGenerate(Event):
                 flag = True
 
         if not flag:
-            leng = -1
-            blk = None
+            # by_time = sorted(me.blocks.values(), key=lambda b: b.created_at)
+            # longest_blk = sorted(by_time, key=lambda b: b.chain_len)
 
             # Find the block ending with the longest chain
-            for x in me.blocks.values():
-                if x.len > leng:
-                    leng = x.len
-                    blk = x
-                    # break
+            longest_blk = me.blocks[0]
+            for bk in me.blocks.values():
 
-            # TODO: 0 - Remove all
-            # Always keep all transactions
+                # Use block creation time to break ties in case of equal length
+                if ((len(bk) > len(longest_blk)) or ((len(bk) == len(longest_blk)) and
+                                                     (bk.created_at < longest_blk.created_at))):
+                    longest_blk = bk
+
+            # TODO: Always keep all transactions
             # but only add those to a block that are not already part of the longest chain
             # will nee a copy of the list
 
