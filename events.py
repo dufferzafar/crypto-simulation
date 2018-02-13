@@ -172,6 +172,10 @@ class BlockGenerate(Event):
         unspent_txns = set(me.transactions.values()) - spent
         unspent_txns = {t.id: t for t in unspent_txns}
 
+        # TODO: ? - Only create a block if I have transactions to send
+        if not unspent_txns:
+            return
+
         # Generate a new block
         new_blk = Block(sim.block_id, self.run_at,
                         me.id, longest_blk.id, len(longest_blk) + 1)
