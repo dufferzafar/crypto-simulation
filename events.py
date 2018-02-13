@@ -158,9 +158,6 @@ class BlockGenerate(Event):
                                                  (bk.created_at < longest_blk.created_at))):
                 longest_blk = bk
 
-        # TODO: Always keep all transactions
-        # but only add those to a block that are not already part of the longest chain
-
         # Traverse the longest chain and find all transactions that've been spent
         spent = set()
 
@@ -232,7 +229,8 @@ class BlockReceive(Event):
         if prev_blk is None:
             return
 
-        # TODO: Add all seen transactions to my list of seen ones?
+        # TODO: ? Add transactions in this block to my list of seen ones
+        me.transactions.update(self.block.transactions)
 
         # Make a copy of the block to increase the length
         new_blk = Block(
