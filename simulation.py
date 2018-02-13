@@ -89,6 +89,8 @@ class Simulator(object):
         # self.peers = random.sample(all_nodes, k) ?
 
         # TODO: Ensure that this creates a fully connected graph
+        # TODO: Store node objects rather than ids
+
         for i in range(self.n):
             count = random.randint(1 + self.n // 2, self.n - 1)
 
@@ -180,7 +182,7 @@ class Simulator(object):
 
     def dump_node_chains(self):
         """
-        Save the tree of blockchain of ever node.
+        Save the blockchain tree of every node to .dot files.
 
         Outputs are graphs in graphviz format:
         https://en.wikipedia.org/wiki/DOT_(graph_description_language)
@@ -204,14 +206,42 @@ class Simulator(object):
 
                     if block.prev_block_id != -1:
                         edge = "\t%d -> %d\n" % (block.prev_block_id, block.id)
+
                         fh.write(edge)
+
                     # else:
                     #     edge = "%d\n" % block.id
 
                 # Close the graph
                 fh.write("\n}")
 
-                # TODO: See if creation times need to be dumped?
-                # for block in node.blocks:
-                #     line = str(block.id) + ":" + str(block.created_at) + "\n"
-                #     fh.write(line)
+    def dump_network(self):
+        """
+        Save the network connections to a .dot file.
+        """
+
+        file = "network.dot"
+        with open(os.path.join(OUT_DIR, file), "w+") as fh:
+
+            fh.write("graph G { \n\n")
+
+            seen = set()
+
+            for node in self.nodes:
+                for peer in node.peers:
+
+                    # No self-loops
+                    if node.id == self.nodes[peer].id:
+                        continue
+
+                    # Only draw an edge once
+                    edge = (node.id, self.nodes[peer].id)
+                    if edge not in seen:
+
+                        # We've seen both edges a->b & b->a
+                        seen.add(edge)
+                        seen.add(edge[::-1])
+
+                        fh.write("\t%d -- %d\n" % edge)
+
+            fh.write("\n}")

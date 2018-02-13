@@ -9,5 +9,6 @@ if __name__ == '__main__':
 
     sim = Simulator(n, z)
 
-    sim.run(until=10)
+    sim.run(until)
     sim.dump_node_chains()
+    sim.dump_network()
