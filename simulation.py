@@ -175,15 +175,20 @@ class Simulator(object):
             with open(os.path.join(OUT_DIR, file), "w+") as fh:
 
                 # Graphviz header format
+                # TODO: Stylish graph nodes etc. (lookup gdot documentation)
                 fh.write("digraph G { \n\n")
 
+                # Draw edges of the blockchain tree
                 for block in node.blocks:
+
                     if block.prev_block_id != -1:
-                        edge = "\t%d -> %d" % (block.prev_block_id, block.id)
+                        edge = "\t%d -> %d\n" % (block.prev_block_id, block.id)
                         fh.write(edge)
+                    # else:
+                    #     edge = "%d\n" % block.id
 
                 # Close the graph
-                fh.write("\n\n}")
+                fh.write("\n}")
 
                 # TODO: See if creation times need to be dumped?
                 # for block in node.blocks:
