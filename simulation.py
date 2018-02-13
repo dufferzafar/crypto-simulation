@@ -82,27 +82,21 @@ class Simulator(object):
         return slow_nodes + fast_nodes
 
     def set_random_peers(self):
-        """Set random peers of each node."""
+        """
+        Set random peers of each node.
 
-        # Care needs to be taken to ensure that the resulting graph is connected
-        # So every node can send messages to every other node
-        # self.peers = random.sample(all_nodes, k) ?
+        Care needs to be taken to ensure that the resulting graph is connected, so
+        that every node can send messages to every other node.
+        """
 
-        # TODO: Ensure that this creates a fully connected graph
-        # TODO: Store node objects rather than ids
+        for me in self.nodes:
+            # This ensures that network graph remains connected
+            # But this doesn't consider all possible connected graphs!
+            num_peers = random.randint(1 + self.n // 2, self.n - 1)
 
-        for i in range(self.n):
-            count = random.randint(1 + self.n // 2, self.n - 1)
+            all_but_me = list(set(self.nodes) - set([me]))
 
-            for j in range(count):
-                adj = random.randint(0, self.n - 1)
-
-                # Create symmetric links
-                if adj not in self.nodes[i].peers:
-                    self.nodes[i].peers.append(adj)
-
-                if i not in self.nodes[adj].peers:
-                    self.nodes[adj].peers.append(i)
+            me.peers = random.sample(all_but_me, num_peers)
 
     def seed_events_queue(self):
         """Seed the events queue with BlockGenerate & TransactionGenerate events."""
@@ -231,11 +225,11 @@ class Simulator(object):
                 for peer in node.peers:
 
                     # No self-loops
-                    if node.id == self.nodes[peer].id:
+                    if node.id == peer.id:
                         continue
 
                     # Only draw an edge once
-                    edge = (node.id, self.nodes[peer].id)
+                    edge = (node.id, peer.id)
                     if edge not in seen:
 
                         # We've seen both edges a->b & b->a
