@@ -1,10 +1,20 @@
-from queue import PriorityQueue
+"""
+This module implements the simulation.
+
+Using nodes, blocks, and events.
+"""
+
+# Python's stdlib
+import math
+import os
 import random
 
-from node import Node
-from events import *
+from queue import PriorityQueue
 
-import math
+# Our custom code
+import events as EV
+from node import Node
+
 # Change this to configure where the output graphs are stored
 OUT_DIR = "output"
 
@@ -28,25 +38,29 @@ class Simulator(object):
         # All nodes in the simulation
         self.nodes = self.create_nodes(n, z)
 
+        # TODO: Use itertools.count for these
         # Block id
         self.block_id = 1
 
         # Transaction id
         self.trans_id = 1
 
+        # Current time of the simulation
+        self.curr_time = 0
+
+        # TODO: Rename to blk_rate
+        # TODO: Add similar for txn_rate
         # Lambda value
         self.lmbd = 10
 
         # TODO: Set random peers of each node
         # Care needs to be taken to ensure that the resulting graph is connected
         # So every node can send messages to every other node
-
-        #@ankit
-        adjmat = [[0 for x in range(n)] for y in range(n)]
         for i in range(n):
-            count = random.randint(n/2,n-1)
+            count = random.randint(n / 2, n - 1)
+
             for j in range(count):
-                adj = random.randint(0,n-1)
+                adj = random.randint(0, n - 1)
                 if adj not in self.nodes[i].peers:
                     self.nodes[i].peers.append(adj)
                 if i not in self.nodes[adj].peers:
@@ -61,18 +75,16 @@ class Simulator(object):
         ]
 
         # TODO: Seed the events queue with BlockGenerate & TransactionGenerate events
-        #@ankit
         for i in range(n):
-            t = math.log(1-random.uniform(0,1))/(-self.lmbd)
-            nextEvent = BlockGenerate(self.nodes[i].id,self.nodes[i].id,0,t)
+            t = math.log(1 - random.uniform(0, 1)) / (-self.lmbd)
+            nextEvent = EV.BlockGenerate(self.nodes[i].id, self.nodes[i].id, 0, t)
             self.events.put(nextEvent)
 
         for i in range(n):
-            t = math.log(1-random.uniform(0,1))/(-self.lmbd)
-            nextEvent = TransactionGenerate(self.nodes[i].id,self.nodes[i].id,0,t)
+            t = math.log(1 - random.uniform(0, 1)) / (-self.lmbd)
+            nextEvent = EV.TransactionGenerate(
+                self.nodes[i].id, self.nodes[i].id, 0, t)
             self.events.put(nextEvent)
-        # Current time of the simulation
-        self.curr_time = 0
 
     def create_nodes(self, n, z):
         """Create n nodes z% of which are slow."""
