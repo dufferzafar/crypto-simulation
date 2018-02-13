@@ -127,42 +127,79 @@ class BlockGenerate(Event):
         )
 
     def run(self, sim):
+        # Hi, this is me!
+        me = sim.nodes[self.node_id]
+
+        # TODO: Learn what this is!
         flag = False
-        for x in sim.nodes[self.node_id].receivedStamps:
+        for x in me.receivedStamps:
             if x > self.run_at:
                 flag = True
 
         if not flag:
             leng = -1
             blk = None
-            for x in sim.nodes[self.node_id].blocks:
+
+            # Find the block ending with the longest chain
+            for x in me.blocks:
                 if x.len > leng:
                     leng = x.len
                     blk = x
                     # break
-            newblk = Block(sim.block_id, self.run_at,
-                           sim.nodes[self.node_id].id, blk.id, leng + 1)
-            sim.block_id += 1
-            for x in sim.nodes[self.node_id].transactions:
+
+            # TODO: 0 - Remove all
+            # Always keep all transactions
+            # but only add those to a block that are not already part of the longest chain
+            # will nee a copy of the list
+
+            # Traverse the longest chain and remove all transactions that
+            # have been logged in it
+            for x in me.transactions:
                 prevblk = blk
+
+                # Genesis blocks have id 0
                 while (prevblk.id != 0):
+
                     if x in prevblk.transactions:
-                        if x in sim.nodes[self.node_id].transactions:
-                            sim.nodes[self.node_id].transactions.remove(x)
-                    prevblk = sim.nodes[self.node_id].get(
-                        prevblk.prev_block_id)
+                        if x in me.transactions:
+                            me.transactions.remove(x)
 
-            newblk.transactions.extend(sim.nodes[self.node_id].transactions)
-            sim.nodes[self.node_id].blocks.append(newblk)
-            sim.nodes[self.node_id].coins += 50
+                    prevblk = me.get(prevblk.prev_block_id)
 
-            for peer_id in sim.nodes[self.node_id].peers:
+            # Generate a new block
+            newblk = Block(
+                sim.block_id,
+                self.run_at,
+                me.id,
+                blk.id,
+                leng + 1
+            )
+            sim.block_id += 1
+            newblk.transactions.extend(me.transactions)
+
+            # Add the block to my chain
+            me.blocks.append(newblk)
+
+            # And give me that sweet sweet mining reward!
+            me.coins += 50
+
+            # Generate BlockReceive events for all my peers
+            for peer_id in me.peers:
+
+                # Except who created the thing!
                 if peer_id != newblk.creator_id:
                     t = sim.latency(
-                        sim.nodes[self.node_id], sim.nodes[peer_id], 1)
-                    nextEvent = BlockReceive(
-                        newblk, peer_id, sim.nodes[self.node_id].id, self.run_at, self.run_at + t)
-                    sim.events.put(nextEvent)
+                        me,
+                        sim.nodes[peer_id],
+                        1
+                    )
+                    sim.events.put(BlockReceive(
+                        newblk,
+                        peer_id,
+                        me.id,
+                        self.run_at,
+                        self.run_at + t
+                    ))
 
 
 class BlockReceive(Event):
