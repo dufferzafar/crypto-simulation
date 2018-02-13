@@ -95,22 +95,26 @@ class TransactionReceive(Event):
         self.transaction = transaction
 
     def run(self, sim):
-
         # Check if this node has already seen this transaction before
-        # If not, then add it to it's list
-        # And generate TransactionReceive events for all its neighbours
+        if self.transaction.id in sim.nodes[self.node_id].transactions:
+            return
 
-        flag = False
-        for x in sim.nodes[self.node_id].transactions:
-            if x.id == self.transaction.id:
-                flag = True
-        if not flag:
-            sim.nodes[self.node_id].transactions.append(self.transaction)
-            for peer_id in sim.nodes[self.node_id].peers:
-                t = sim.latency(sim.nodes[self.node_id], sim.nodes[peer_id], 1)
-                nextEvent = TransactionReceive(
-                    self.transaction, peer_id, sim.nodes[self.node_id].id, self.run_at, self.run_at + t)
-                sim.events.put(nextEvent)
+        # If not, then add it to it's list
+        sim.nodes[self.node_id].transactions.append(self.transaction)
+
+        # And generate TransactionReceive events for all its neighbours
+        for peer_id in sim.nodes[self.node_id].peers:
+
+            # TODO: Pass msg type to latency
+            t = sim.latency(sim.nodes[self.node_id], sim.nodes[peer_id], 1)
+
+            sim.events.put(TransactionReceive(
+                self.transaction,
+                peer_id,
+                sim.nodes[self.node_id].id,
+                self.run_at,
+                self.run_at + t
+            ))
 
 
 class BlockGenerate(Event):
