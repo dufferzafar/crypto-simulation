@@ -134,11 +134,10 @@ class Simulator(object):
         while ev_count <= until:
 
             ev = self.events.get()
-
-            print("t=%f | " % self.curr_time, type(ev))
-            ev.run(self)
-
             self.curr_time = ev.run_at
+
+            print("t=%.8f | " % self.curr_time, ev)
+            ev.run(self)
 
             ev_count += 1
 

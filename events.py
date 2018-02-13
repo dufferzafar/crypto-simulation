@@ -39,7 +39,7 @@ class TransactionGenerate(Event):
         )
 
     def __repr__(self):
-        return "Txn Gen: on=%d" % self.node_id
+        return "T Gen: on=%d" % self.node_id
 
     def run(self, sim):
         # The node that this event is running on
@@ -109,9 +109,7 @@ class TransactionReceive(Event):
         self.transaction = transaction
 
     def __repr__(self):
-        tx = self.transaction
-        r = (self.node_id, tx.from_id, tx.to_id, tx.coins)
-        return "Txn Rcv: on=%d, from=%d, to=%d, amt=%d" % r
+        return "T Rcv: on=%d | %s" % (self.node_id, repr(self.transaction))
 
     def run(self, sim):
         # The node that this event is running on
@@ -148,7 +146,7 @@ class BlockGenerate(Event):
         )
 
     def __repr__(self):
-        return "Blk Gen: on=%d" % self.node_id
+        return "B Gen: on=%d" % self.node_id
 
     def run(self, sim):
         # Hi, this is me!
@@ -237,9 +235,7 @@ class BlockReceive(Event):
         self.block = block
 
     def __repr__(self):
-        bk = self.block
-        r = (self.node_id, bk.id, bk.creator_id, bk.len, len(bk.transactions))
-        return "Blk Rcv: on=%d, id=%d, by=%d, clen=%d, txns=%d" % r
+        return "B Rcv: on=%d | %s" % (self.node_id, repr(self.block))
 
     def run(self, sim):
         # The node that this event is running on

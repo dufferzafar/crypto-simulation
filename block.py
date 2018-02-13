@@ -21,8 +21,8 @@ class Block(object):
         # Length of the chain this block is part of
         self.len = leng;
     def __repr__(self):
-        r = (self.id, self.prev_block_id)
-        return "<Block %d: prev=%d>" % r
+        r = (self.id, self.prev_block_id, self.creator_id, self.len, len(self.transactions))
+        return "<B %d: prev=%d, by=%d, len=%d, txns=%d>" % r
 
 
 class Transaction(object):
@@ -37,4 +37,4 @@ class Transaction(object):
 
     def __repr__(self):
         r = (self.id, self.from_id, self.to_id, self.coins)
-        return "<Trans %d: from=%d, to=%d, coins=%d>" % r
+        return "<T %d: from=%d, to=%d, amt=%d>" % r
