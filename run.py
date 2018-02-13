@@ -1,4 +1,3 @@
-
 from simulation import Simulator
 
 
@@ -11,4 +10,4 @@ if __name__ == '__main__':
     sim = Simulator(n, z)
 
     sim.run(until=10)
-    sim.printblockchain()
+    sim.dump_node_chains()

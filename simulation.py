@@ -3,7 +3,14 @@ import random
 
 from node import Node
 from events import *
+
 import math
+# Change this to configure where the output graphs are stored
+OUT_DIR = "output"
+
+if not os.path.isdir(OUT_DIR):
+    os.makedirs(OUT_DIR)
+
 
 class Simulator(object):
 
@@ -137,21 +144,36 @@ class Simulator(object):
 
         # latency is of the form p_ij + |m|/c_ij + d_ij
         return (p + m / c + d)
-    # @ Avinash
-    # function which create files of the particular simulation
 
+    def dump_node_chains(self):
+        """
+        Save the tree of blockchain of ever node.
 
-    def printblockchain(self):
+        Outputs are graphs in graphviz format:
+        https://en.wikipedia.org/wiki/DOT_(graph_description_language)
+
+        To convert them to png run:
+        """
 
         for node in self.nodes:
-            fh = open("../output/"+str(node.id)+str(node.is_fast)+".txt","w+")
-            for block in node.blocks:
-                if block.prev_block_id != -1:
-                    line = str(block.prev_block_id)+"->"+str(block.id)+"\n"
-                    fh.write(line)
 
-            fh.write("\n")
-            for block in node.blocks:
-                line = str(block.id)+":"+str(block.created_at)+"\n"
-                fh.write(line)
-            fh.close()
+            file = "%d_%s.dot" % (node.id,
+                                  "fast" if node.is_fast else "slow")
+
+            with open(os.path.join(OUT_DIR, file), "w+") as fh:
+
+                # Graphviz header format
+                fh.write("digraph G { \n\n")
+
+                for block in node.blocks:
+                    if block.prev_block_id != -1:
+                        edge = "\t%d -> %d" % (block.prev_block_id, block.id)
+                        fh.write(edge)
+
+                # Close the graph
+                fh.write("\n\n}")
+
+                # TODO: See if creation times need to be dumped?
+                # for block in node.blocks:
+                #     line = str(block.id) + ":" + str(block.created_at) + "\n"
+                #     fh.write(line)
