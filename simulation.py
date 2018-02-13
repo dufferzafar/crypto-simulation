@@ -5,7 +5,6 @@ Using nodes, blocks, and events.
 """
 
 # Python's stdlib
-import math
 import os
 import random
 
@@ -38,6 +37,9 @@ class Simulator(object):
         # All nodes in the simulation
         self.nodes = self.create_nodes(n, z)
 
+        # Randomize peers of each node!
+        self.set_random_peers()
+
         # TODO: Use itertools.count for these
         # Block id
         self.block_id = 1
@@ -53,19 +55,6 @@ class Simulator(object):
         # Lambda value
         self.lmbd = 10
 
-        # TODO: Set random peers of each node
-        # Care needs to be taken to ensure that the resulting graph is connected
-        # So every node can send messages to every other node
-        for i in range(n):
-            count = random.randint(n / 2, n - 1)
-
-            for j in range(count):
-                adj = random.randint(0, n - 1)
-                if adj not in self.nodes[i].peers:
-                    self.nodes[i].peers.append(adj)
-                if i not in self.nodes[adj].peers:
-                    self.nodes[adj].peers.append(i)
-
         # Set propagation delays between each pair of nodes
         self.prop_delay = [
             # From assignment:
@@ -74,17 +63,8 @@ class Simulator(object):
             for _ in range(0, n)
         ]
 
-        # TODO: Seed the events queue with BlockGenerate & TransactionGenerate events
-        for i in range(n):
-            t = math.log(1 - random.uniform(0, 1)) / (-self.lmbd)
-            nextEvent = EV.BlockGenerate(self.nodes[i].id, self.nodes[i].id, 0, t)
-            self.events.put(nextEvent)
-
-        for i in range(n):
-            t = math.log(1 - random.uniform(0, 1)) / (-self.lmbd)
-            nextEvent = EV.TransactionGenerate(
-                self.nodes[i].id, self.nodes[i].id, 0, t)
-            self.events.put(nextEvent)
+        # Add some intial events
+        self.seed_events_queue()
 
     def create_nodes(self, n, z):
         """Create n nodes z% of which are slow."""
@@ -101,7 +81,52 @@ class Simulator(object):
 
         return slow_nodes + fast_nodes
 
-    def run(self, until):
+    def set_random_peers(self):
+        """Set random peers of each node."""
+
+        # Care needs to be taken to ensure that the resulting graph is connected
+        # So every node can send messages to every other node
+        # self.peers = random.sample(all_nodes, k) ?
+
+        # TODO: Ensure that this creates a fully connected graph
+        for i in range(self.n):
+            count = random.randint(1 + self.n // 2, self.n - 1)
+
+            for j in range(count):
+                adj = random.randint(0, self.n - 1)
+
+                # Create symmetric links
+                if adj not in self.nodes[i].peers:
+                    self.nodes[i].peers.append(adj)
+
+                if i not in self.nodes[adj].peers:
+                    self.nodes[adj].peers.append(i)
+
+    def seed_events_queue(self):
+        """Seed the events queue with BlockGenerate & TransactionGenerate events."""
+
+        for node in self.nodes:
+            t = random.expovariate(self.lmbd)
+
+            blk_gen = EV.BlockGenerate(
+                node.id,
+                node.id,
+                0,
+                t
+            )
+
+            self.events.put(blk_gen)
+
+            trns_gen = EV.TransactionGenerate(
+                node.id,
+                node.id,
+                0,
+                t
+            )
+
+            self.events.put(trns_gen)
+
+    def run(self, until=100):
         """Run all events until some max number of events."""
 
         ev_count = 0
@@ -110,7 +135,7 @@ class Simulator(object):
 
             ev = self.events.get()
 
-            print("Running", type(ev), "at t=%f" % self.curr_time)
+            print("t=%f | " % self.curr_time, type(ev))
             ev.run(self)
 
             self.curr_time = ev.run_at
