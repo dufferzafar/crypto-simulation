@@ -213,54 +213,60 @@ class BlockReceive(Event):
         self.block = block
 
     def run(self, sim):
-        flag = False
-        for x in sim.nodes[self.node_id].blocks:
-            if x.id == self.block.id:
-                flag = True
+        # The node that this event is running on
+        me = sim.nodes[self.node_id]
+
+        # Check if this node has already seen this block before
+        if self.block.id in me.blocks:
+            return
+
+        # Find previous block to the one that we've just received
+        blk = None
+        for x in me.blocks:
+            if x.id == self.block.prev_block_id:
+                blk = x
                 break
 
-        if not flag:
-            blk = None
-            for x in sim.nodes[self.node_id].blocks:
-                if x.id == self.block.prev_block_id:
-                    blk = x
-                    break
+        # TODO: Why would I not have received the previous block?
+        if blk is None:
+            return
 
-            # To break the loop if previous block does not exist in the current block chain why????
-            if blk is None:
-                return
+        # Make a copy of the block to increase the length
+        newblk = Block(
+            self.block.id,
+            self.block.created_at,
+            self.block.creator_id,
+            blk.id,
+            self.block.len
+        )
+        newblk.len += 1
 
-            newblk = Block(self.block.id, self.block.created_at,
-                           self.block.creator_id, blk.id, self.block.len)
-            newblk.len += 1
-            sim.nodes[self.node_id].blocks.append(newblk)
-            sim.nodes[self.node_id].receivedStamps.append(newblk.created_at)
+        # Add the block to my chain
+        me.blocks.append(newblk)
+        me.receivedStamps.append(newblk.created_at)
 
-            for peer_id in sim.nodes[self.node_id].peers:
-                if peer_id != self.block.creator_id:
-                    t = sim.latency(
-                        sim.nodes[self.node_id],
-                        sim.nodes[peer_id],
-                        1
-                    )
+        # Generate BlockReceive events for all my peers
+        for peer_id in me.peers:
 
-                    nextEvent = BlockReceive(
-                        self.block,
-                        peer_id,
-                        sim.nodes[self.node_id].id,
-                        self.run_at,
-                        self.run_at + t
-                    )
-                    sim.events.put(nextEvent)
+            # Except for who created it
+            if peer_id != self.block.creator_id:
 
-            # Do we need a schedule time value to be passed as well.
-            lmbd = sim.lmbd
+                t = sim.latency(me, sim.nodes[peer_id], 1)
 
-            t = math.log(1 - random.uniform(0, 1)) / (-lmbd)
-            nextEvent = BlockGenerate(
-                sim.nodes[self.node_id].id,
-                sim.nodes[self.node_id].id,
-                self.run_at,
-                self.run_at + t
-            )
-            sim.events.put(nextEvent)
+                sim.events.put(BlockReceive(
+                    self.block,
+                    peer_id,
+                    me.id,
+                    self.run_at,
+                    self.run_at + t
+                ))
+
+        # TODO: Do we need a schedule time value to be passed as well?
+        # Create a new block generation event for me
+        t = random.expovariate(sim.lmbd)
+        sim.events.put(BlockGenerate(
+            me.id,
+            me.id,
+            self.run_at,
+            self.run_at + t
+        ))
