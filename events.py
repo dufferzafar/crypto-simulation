@@ -108,7 +108,8 @@ class TransactionReceive(Event):
         tx = self.transaction
 
         # Check if this node has already seen this transaction before
-        if tx.id in me.transactions:
+        transactions_seen = ([t.id for t in me.transactions])
+        if tx.id in transactions_seen:
             return
 
         # If not, then add it to it's list
@@ -228,7 +229,9 @@ class BlockReceive(Event):
         me = sim.nodes[self.node_id]
 
         # Check if this node has already seen this block before
-        if self.block.id in me.blocks:
+        # TODO: Make node.blocks to be a dict keyed by the id
+        blocks_seen = ([b.id for b in me.blocks])
+        if self.block.id in blocks_seen:
             return
 
         # Find previous block to the one that we've just received
