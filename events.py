@@ -77,12 +77,12 @@ class TransactionGenerate(Event):
         ))
 
         # Create next transaction events for neighbours
-        for peer_id in me.peers:
-            t = sim.latency(me, sim.nodes[peer_id], msg_type="transaction")
+        for peer in me.peers:
+            t = sim.latency(me, peer, msg_type="transaction")
 
             sim.events.put(TransactionReceive(
                 new_trans,
-                peer_id,
+                peer.id,
                 me.id,
                 self.run_at,
                 self.run_at + t
@@ -115,12 +115,12 @@ class TransactionReceive(Event):
         me.transactions[tx.id] = tx
 
         # And generate TransactionReceive events for all its neighbours
-        for peer_id in me.peers:
+        for peer in me.peers:
 
-            t = sim.latency(me, sim.nodes[peer_id], msg_type="transaction")
+            t = sim.latency(me, peer, msg_type="transaction")
             sim.events.put(TransactionReceive(
                 tx,
-                peer_id,
+                peer.id,
                 me.id,
                 self.run_at,
                 self.run_at + t
@@ -190,15 +190,15 @@ class BlockGenerate(Event):
         me.coins += 50
 
         # Generate BlockReceive events for all my peers
-        for peer_id in me.peers:
+        for peer in me.peers:
 
             # Except who created the thing!
-            if peer_id != new_blk.creator_id:
-                t = sim.latency(me, sim.nodes[peer_id], msg_type="block")
+            if peer.id != new_blk.creator_id:
+                t = sim.latency(me, peer, msg_type="block")
 
                 sim.events.put(BlockReceive(
                     new_blk,
-                    peer_id,
+                    peer.id,
                     me.id,
                     self.run_at,
                     self.run_at + t
@@ -247,25 +247,28 @@ class BlockReceive(Event):
 
         # Add the block to my chain
         me.blocks[new_blk.id] = new_blk
-        me.receivedStamps.append(new_blk.created_at)
+
+        # TODO:
+        me.receivedStamps.append(sel.run_at)
+        # me.receivedStamps.append(new_blk.created_at)
 
         # Generate BlockReceive events for all my peers
-        for peer_id in me.peers:
+        for peer in me.peers:
 
             # Except for who created it
-            if peer_id != self.block.creator_id:
+            if peer.id != self.block.creator_id:
 
-                t = sim.latency(me, sim.nodes[peer_id], msg_type="block")
+                t = sim.latency(me, peer, msg_type="block")
 
                 sim.events.put(BlockReceive(
                     self.block,
-                    peer_id,
+                    peer.id,
                     me.id,
                     self.run_at,
                     self.run_at + t
                 ))
 
-        # TODO: Do we need a schedule time value to be passed as well?
+        # TODO: ? - Do we need a schedule time value to be passed as well?
         # Create a new block generation event for me
         t = random.expovariate(sim.lmbd)
         sim.events.put(BlockGenerate(
