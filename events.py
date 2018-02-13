@@ -64,7 +64,7 @@ class TransactionGenerate(Event):
         )
 
         sim.trans_id += 1
-        me.transactions.append(new_trans)
+        me.transactions[new_trans.id] = new_trans
 
         # Create a next transaction event for this node
         # TODO: Create a separate function in sim for transaction_delay
@@ -108,12 +108,11 @@ class TransactionReceive(Event):
         tx = self.transaction
 
         # Check if this node has already seen this transaction before
-        transactions_seen = ([t.id for t in me.transactions])
-        if tx.id in transactions_seen:
+        if tx.id in me.transactions:
             return
 
         # If not, then add it to it's list
-        me.transactions.append(tx)
+        me.transactions[tx.id] = tx
 
         # And generate TransactionReceive events for all its neighbours
         for peer_id in me.peers:
@@ -179,15 +178,11 @@ class BlockGenerate(Event):
                     prev_blk = me.blocks[prev_blk.prev_block_id]
 
             # Generate a new block
-            new_blk = Block(
-                sim.block_id,
-                self.run_at,
-                me.id,
-                blk.id,
-                leng + 1
-            )
+            new_blk = Block(sim.block_id, self.run_at,
+                            me.id, longest_blk.id, len(longest_blk) + 1)
+            new_blk.transactions.update(unspent_txns)
+
             sim.block_id += 1
-            new_blk.transactions.extend(me.transactions)
 
             # Add the block to my chain
             me.blocks[new_blk.id] = new_blk
@@ -233,7 +228,7 @@ class BlockReceive(Event):
             return
 
         # Find previous block to the one that we've just received
-        prev_blk = me.blocks[self.block.prev_block_id]
+        prev_blk = me.blocks.get(self.block.prev_block_id)
 
         # TODO: Why would I not have received the previous block?
         if prev_blk is None:

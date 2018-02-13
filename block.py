@@ -14,11 +14,10 @@ class Block(object):
         # This link helps create a chain of blocks
         self.prev_block_id = prev_block_id
 
-        # Contains a dict of Transactions
+        # Contains a dict of transactions keyed by the id
+        self.transactions = {}
 
-        #self.transactions = {}
         # Length of the chain ending at this block
-        self.transactions = []
         self.chain_len = chain_len
 
     def __len__(self):

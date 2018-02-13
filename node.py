@@ -26,8 +26,8 @@ class Node(object):
 
         }
 
-        # List of transactions this node has seen
-        self.transactions = []
+        # Dict of transactions this node has seen
+        self.transactions = {}
 
     def __repr__(self):
         r = (self.id, self.coins, ("fast" if self.is_fast else "slow"))
