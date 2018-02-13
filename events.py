@@ -245,9 +245,8 @@ class BlockReceive(Event):
             self.block.created_at,
             self.block.creator_id,
             prev_blk.id,
-            self.block.len
+            len(self.block) + 1
         )
-        new_blk.len += 1
 
         # Add the block to my chain
         me.blocks[new_blk.id] = new_blk

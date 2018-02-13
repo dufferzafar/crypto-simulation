@@ -22,7 +22,7 @@ class Node(object):
 
             # Each node begins with a genesis block
             0: Block(block_id=0, created_at=0.0, creator_id=self.id,
-                     prev_block_id=-1, leng=0)
+                     prev_block_id=-1, chain_len=0)
 
         }
 
