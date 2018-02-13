@@ -162,21 +162,20 @@ class BlockGenerate(Event):
 
             # TODO: Always keep all transactions
             # but only add those to a block that are not already part of the longest chain
-            # will nee a copy of the list
 
-            # Traverse the longest chain and remove all transactions that
-            # have been logged in it
-            for x in me.transactions:
-                prev_blk = blk
+            # Traverse the longest chain and find all transactions that've been spent
+            spent = set()
 
-                # Genesis blocks have id 0
-                while (prev_blk.id != 0):
+            bk = longest_blk
+            while (bk.id != 0):  # Genesis blocks have id 0
 
-                    if x in prev_blk.transactions:
-                        if x in me.transactions:
-                            me.transactions.remove(x)
+                # https://stackoverflow.com/a/7692347/2043048
+                spent |= set(bk.transactions.values())
+                bk = me.blocks[bk.prev_block_id]
 
-                    prev_blk = me.blocks[prev_blk.prev_block_id]
+            # Unspent = Seen - Spent
+            unspent_txns = set(me.transactions.values()) - spent
+            unspent_txns = {t.id: t for t in unspent_txns}
 
             # Generate a new block
             new_blk = Block(sim.block_id, self.run_at,
