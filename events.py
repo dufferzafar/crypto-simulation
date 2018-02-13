@@ -78,7 +78,7 @@ class TransactionGenerate(Event):
 
         # Create next transaction events for neighbours
         for peer_id in me.peers:
-            t = sim.latency(me, sim.nodes[peer_id], 1)
+            t = sim.latency(me, sim.nodes[peer_id], msg_type="transaction")
 
             sim.events.put(TransactionReceive(
                 new_trans,
@@ -117,9 +117,7 @@ class TransactionReceive(Event):
         # And generate TransactionReceive events for all its neighbours
         for peer_id in me.peers:
 
-            # TODO: Pass msg type to latency
-            t = sim.latency(me, sim.nodes[peer_id], 1)
-
+            t = sim.latency(me, sim.nodes[peer_id], msg_type="transaction")
             sim.events.put(TransactionReceive(
                 tx,
                 peer_id,
@@ -201,11 +199,8 @@ class BlockGenerate(Event):
 
                 # Except who created the thing!
                 if peer_id != newblk.creator_id:
-                    t = sim.latency(
-                        me,
-                        sim.nodes[peer_id],
-                        1
-                    )
+                    t = sim.latency(me, sim.nodes[peer_id], msg_type="block")
+
                     sim.events.put(BlockReceive(
                         newblk,
                         peer_id,
@@ -267,7 +262,7 @@ class BlockReceive(Event):
             # Except for who created it
             if peer_id != self.block.creator_id:
 
-                t = sim.latency(me, sim.nodes[peer_id], 1)
+                t = sim.latency(me, sim.nodes[peer_id], msg_type="block")
 
                 sim.events.put(BlockReceive(
                     self.block,

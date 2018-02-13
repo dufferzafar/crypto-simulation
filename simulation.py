@@ -144,25 +144,22 @@ class Simulator(object):
         # TODO: Print stats on types of events run
         # print("Total %d events were run." % ev_count)
 
-    def latency(self, a, b, msg_size_mb=0):
+    def latency(self, a, b, msg_type):
         """Return latency between nodes a & b."""
 
         i, j = self.nodes.index(a), self.nodes.index(b)
-        # i = -1
-        # j = -1
-        # for x in range(self.n):
-        #     if self.nodes[x].id == a:
-        #         i = x
-        #     if self.nodes[x].id == b:
-        #         j = b
 
         # Propagation delays p_ij chosen at start of simulation
         p = self.prop_delay[i][j]
 
-        # TODO: Deal with varying msg_size_mb!
         # for a msg of only 1 transaction: assume that |m| = 0
+        if msg_type == "transaction":
+            m = 0
         # for a msg of a block: assume that |m| = 1 MB (8 × 10**6 b)
-        m = msg_size_mb * 8 * (10 ** 6)
+        elif msg_type == "block":
+            m = 8 * (10 ** 6)
+        else:
+            raise ValueError("msg_type")
 
         # c_ij is set to 100 Mbps if both i and j are fast
         if a.is_fast and b.is_fast:
