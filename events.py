@@ -1,3 +1,8 @@
+"""
+Implements the four kinds of events that can happen in the simulation.
+
+TransactionGenerate, TransactionReceive, BlockGenerate, BlockReceive
+"""
 
 from block import Block, Transaction
 import random
@@ -32,6 +37,9 @@ class TransactionGenerate(Event):
         super(TransactionGenerate, self).__init__(
             node_id, creator_id, created_at, run_at
         )
+
+    def __repr__(self):
+        return "Txn Gen: on=%d" % self.node_id
 
     def run(self, sim):
         # The node that this event is running on
@@ -100,6 +108,11 @@ class TransactionReceive(Event):
         # The transaction that was received
         self.transaction = transaction
 
+    def __repr__(self):
+        tx = self.transaction
+        r = (self.node_id, tx.from_id, tx.to_id, tx.coins)
+        return "Txn Rcv: on=%d, from=%d, to=%d, amt=%d" % r
+
     def run(self, sim):
         # The node that this event is running on
         me = sim.nodes[self.node_id]
@@ -133,6 +146,9 @@ class BlockGenerate(Event):
         super(BlockGenerate, self).__init__(
             node_id, creator_id, created_at, run_at
         )
+
+    def __repr__(self):
+        return "Blk Gen: on=%d" % self.node_id
 
     def run(self, sim):
         # Hi, this is me!
@@ -219,6 +235,11 @@ class BlockReceive(Event):
 
         # The block we've received
         self.block = block
+
+    def __repr__(self):
+        bk = self.block
+        r = (self.node_id, bk.id, bk.creator_id, bk.len, len(bk.transactions))
+        return "Blk Rcv: on=%d, id=%d, by=%d, clen=%d, txns=%d" % r
 
     def run(self, sim):
         # The node that this event is running on
