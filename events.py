@@ -34,32 +34,35 @@ class TransactionGenerate(Event):
         )
 
     def run(self, sim):
-        # all_but_me = set(sim.nodes) - set([sim.nodes[self.node_id]]);
+        # The node that this event is running on
+        me = sim.nodes[self.node_id]
+
+        # all_but_me = set(sim.nodes) - set([me]);
         # TODO: random.choice(all_but_me)
 
         # Find a random receiver who will receive the coins in the transaction
         toid = -1
-        while(toid == sim.nodes[self.node_id].id):
+        while(toid == me.id):
             toid = random.randint(0, sim.n - 1)
 
         # Generate a random amount not greater than current node's balance
         factor = random.uniform(0, 1)
-        transAmt = sim.nodes[self.node_id].coins * factor
+        transAmt = me.coins * factor
 
         # Update the coins of both sender & receiver
-        sim.nodes[self.node_id].coins -= transAmt
+        me.coins -= transAmt
         sim.nodes[toid].coins += transAmt
 
         # Add transaction to current node's transaction list
         newTrans = Transaction(
             sim.trans_id,
-            sim.nodes[self.node_id].id,
+            me.id,
             toid,
             transAmt
         )
 
         sim.trans_id += 1
-        sim.nodes[self.node_id].transactions.append(newTrans)
+        me.transactions.append(newTrans)
 
         # Create a next transaction event for this node
         lmbd = sim.lmbd
@@ -68,20 +71,20 @@ class TransactionGenerate(Event):
         t = math.log(1 - random.uniform(0, 1)) / (-lmbd)
 
         sim.events.put(TransactionGenerate(
-            sim.nodes[self.node_id].id,
-            sim.nodes[self.node_id].id,
+            me.id,
+            me.id,
             self.run_at,
             self.run_at + t
         ))
 
         # Create next transaction events for neighbours
-        for peer_id in sim.nodes[self.node_id].peers:
-            t = sim.latency(sim.nodes[self.node_id], sim.nodes[peer_id], 1)
+        for peer_id in me.peers:
+            t = sim.latency(me, sim.nodes[peer_id], 1)
 
             sim.events.put(TransactionReceive(
                 newTrans,
                 peer_id,
-                sim.nodes[self.node_id].id,
+                me.id,
                 self.run_at,
                 self.run_at + t
             ))
@@ -94,26 +97,31 @@ class TransactionReceive(Event):
             node_id, creator_id, created_at, run_at
         )
 
+        # The transaction that was received
         self.transaction = transaction
 
     def run(self, sim):
+        # The node that this event is running on
+        me = sim.nodes[self.node_id]
+        tx = self.transaction
+
         # Check if this node has already seen this transaction before
-        if self.transaction.id in sim.nodes[self.node_id].transactions:
+        if tx.id in me.transactions:
             return
 
         # If not, then add it to it's list
-        sim.nodes[self.node_id].transactions.append(self.transaction)
+        me.transactions.append(tx)
 
         # And generate TransactionReceive events for all its neighbours
-        for peer_id in sim.nodes[self.node_id].peers:
+        for peer_id in me.peers:
 
             # TODO: Pass msg type to latency
-            t = sim.latency(sim.nodes[self.node_id], sim.nodes[peer_id], 1)
+            t = sim.latency(me, sim.nodes[peer_id], 1)
 
             sim.events.put(TransactionReceive(
-                self.transaction,
+                tx,
                 peer_id,
-                sim.nodes[self.node_id].id,
+                me.id,
                 self.run_at,
                 self.run_at + t
             ))
