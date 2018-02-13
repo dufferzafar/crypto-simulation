@@ -83,20 +83,23 @@ class Simulator(object):
         return slow_nodes + fast_nodes
 
     def run(self, until):
-        """Run all events until some time."""
+        """Run all events until some max number of events."""
 
         ev_count = 0
 
-        while self.curr_time <= until:
+        while ev_count <= until:
 
             ev = self.events.get()
+
+            print("Running", type(ev), "at t=%f" % self.curr_time)
             ev.run(self)
 
             self.curr_time = ev.run_at
-            ev_count += 1
-            print("%d\n",self.curr_time)
 
-        return ev_count
+            ev_count += 1
+
+        # TODO: Print stats on types of events run
+        # print("Total %d events were run." % ev_count)
 
     def latency(self, a, b, msg_size_mb=0):
         """Return latency between nodes a & b."""
