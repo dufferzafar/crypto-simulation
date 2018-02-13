@@ -6,7 +6,6 @@ TransactionGenerate, TransactionReceive, BlockGenerate, BlockReceive
 
 from block import Block, Transaction
 import random
-import math
 
 
 class Event(object):
@@ -45,39 +44,31 @@ class TransactionGenerate(Event):
         # The node that this event is running on
         me = sim.nodes[self.node_id]
 
-        # all_but_me = set(sim.nodes) - set([me]);
-        # TODO: random.choice(all_but_me)
+        # Generate a random amount not greater than current node's balance
+        trans_amt = me.coins * random.uniform(0, 1)
 
         # Find a random receiver who will receive the coins in the transaction
-        toid = -1
-        while(toid == me.id):
-            toid = random.randint(0, sim.n - 1)
-
-        # Generate a random amount not greater than current node's balance
-        factor = random.uniform(0, 1)
-        transAmt = me.coins * factor
+        all_but_me = list(set(sim.nodes) - set([me]))
+        receiver = random.choice(all_but_me)
 
         # Update the coins of both sender & receiver
-        me.coins -= transAmt
-        sim.nodes[toid].coins += transAmt
+        me.coins -= trans_amt
+        receiver.coins += trans_amt
 
         # Add transaction to current node's transaction list
-        newTrans = Transaction(
+        new_trans = Transaction(
             sim.trans_id,
             me.id,
-            toid,
-            transAmt
+            receiver.id,
+            trans_amt
         )
 
         sim.trans_id += 1
-        me.transactions.append(newTrans)
+        me.transactions.append(new_trans)
 
         # Create a next transaction event for this node
-        lmbd = sim.lmbd
-
         # TODO: Create a separate function in sim for transaction_delay
-        t = math.log(1 - random.uniform(0, 1)) / (-lmbd)
-
+        t = random.expovariate(sim.lmbd)
         sim.events.put(TransactionGenerate(
             me.id,
             me.id,
@@ -90,7 +81,7 @@ class TransactionGenerate(Event):
             t = sim.latency(me, sim.nodes[peer_id], 1)
 
             sim.events.put(TransactionReceive(
-                newTrans,
+                new_trans,
                 peer_id,
                 me.id,
                 self.run_at,
