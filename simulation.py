@@ -200,7 +200,7 @@ class Simulator(object):
                 fh.write("digraph G { \n\n")
 
                 # Draw edges of the blockchain tree
-                for block in node.blocks:
+                for block in node.blocks.values():
 
                     if block.prev_block_id != -1:
                         edge = "\t%d -> %d\n" % (block.prev_block_id, block.id)
