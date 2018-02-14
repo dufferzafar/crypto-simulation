@@ -51,8 +51,15 @@ class Node(object):
 
         # Now find all the blocks in this chain
         bk = longest_bk
-        while (bk.id != 0):  # Genesis blocks have id 0
+
+        # I hate while True loops but alas, python doesn't have do-while!
+        while True:
+
             chain.append(bk)
+
+            # Chain ends at Genesis block which have id 0
+            if bk.id == 0:
+                break
 
             # Move backwards
             bk = self.blocks[bk.prev_block_id]
