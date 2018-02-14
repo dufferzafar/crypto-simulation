@@ -32,3 +32,29 @@ class Node(object):
     def __repr__(self):
         r = (self.id, self.coins, ("fast" if self.is_fast else "slow"))
         return "<Node %d:, coins=%d, %s>" % r
+
+    def longest_chain(self):
+        """
+        Return the blocks of the longest chain.
+        """
+
+        chain = []
+
+        # Find the block ending with the longest chain
+        longest_bk = self.blocks[0]
+        for bk in self.blocks.values():
+
+            # Use block creation time to break ties in case of equal length
+            if ((len(bk) > len(longest_bk)) or ((len(bk) == len(longest_bk)) and
+                                                (bk.created_at < longest_bk.created_at))):
+                longest_bk = bk
+
+        # Now find all the blocks in this chain
+        bk = longest_bk
+        while (bk.id != 0):  # Genesis blocks have id 0
+            chain.append(bk)
+
+            # Move backwards
+            bk = self.blocks[bk.prev_block_id]
+
+        return chain

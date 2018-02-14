@@ -194,7 +194,7 @@ class Simulator(object):
         # latency is of the form p_ij + |m|/c_ij + d_ij
         return (p + m / c + d)
 
-    def dump_node_chains(self):
+    def dump_node_chains(self, pruned=False):
         """
         Save the blockchain tree of every node to .dot files.
 
@@ -206,8 +206,10 @@ class Simulator(object):
 
         for node in self.nodes:
 
-            file = "%d_%s.dot" % (node.id,
-                                  "fast" if node.is_fast else "slow")
+            node_type = "fast" if node.is_fast else "slow"
+            prune = "_pruned" if pruned else ""
+
+            file = "%d_%s%s.dot" % (node.id, node_type, prune)
 
             with open(os.path.join(OUT_DIR, file), "w+") as fh:
 
@@ -259,6 +261,14 @@ class Simulator(object):
                         fh.write("\t%d -- %d\n" % edge)
 
             fh.write("\n}")
+
+    def prune_node_chains(self):
+        """
+        Remove all blocks except the longest chain.
+        """
+
+        for node in self.nodes:
+            node.blocks = {b.id: b for b in node.longest_chain()}
 
     def convert_graphs(self):
         """

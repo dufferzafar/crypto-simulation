@@ -49,5 +49,9 @@ if __name__ == '__main__':
     print("\n >>>> Dumping blockchains of all nodes ")
     sim.dump_node_chains()
 
+    print("\n >>>> Dumping blockchains of all nodes (pruned) ")
+    sim.prune_node_chains()
+    sim.dump_node_chains(pruned=True)
+
     print("\n >>>> Rendering graphs to png images ")
     sim.convert_graphs()
