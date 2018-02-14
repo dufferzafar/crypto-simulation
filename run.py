@@ -37,10 +37,17 @@ if __name__ == '__main__':
 
     sim = Simulator(args.n, args.z, args.tm, args.bm)
 
+    print("\n >>>> Cleaning graphs directory ")
     sim.remove_graphs()
 
+    print("\n >>>> Running simulation \n")
     sim.run(args.until, args.q)
+
+    print("\n >>>> Dumping network graph ")
     sim.dump_network()
+
+    print("\n >>>> Dumping blockchains of all nodes ")
     sim.dump_node_chains()
 
+    print("\n >>>> Rendering graphs to png images ")
     sim.convert_graphs()

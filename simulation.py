@@ -141,13 +141,17 @@ class Simulator(object):
 
         ev_count = 0
 
+        if not quiet:
+            print("     N |     t      |     Event")
+            print("       |            | ")
+
         while ev_count <= until:
 
             ev = self.events.get()
             self.curr_time = ev.run_at
 
             if not quiet:
-                print("%6d | t=%.8f | %s" % (ev_count, self.curr_time, ev))
+                print("%6d | %.8f | %s" % (ev_count, self.curr_time, ev))
 
             ev.run(self)
 

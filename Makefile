@@ -3,14 +3,8 @@ default: run graphs
 OUT_DIR = output
 
 run:
-	@printf "\n --- Starting simulation --- \n\n"
-	@python3 run.py
-
-graphs:
-	@printf "\n --- Converting graphs to images --- \n"
-	@python3 graphs.py
+	@python3 run.py 10 0.3 3 10
 
 clean:
-	@printf "\n --- Cleaning output directory --- \n"
+	@printf "\n >>>> Cleaning graphs directory "
 	@rm -rf $(OUT_DIR)/*.*
-
