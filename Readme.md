@@ -10,15 +10,17 @@ Assignment 1 of COL 867 - High Speed Networks course at IIT Delhi taught by Prof
 
 * We've used Python 3 on Ubuntu for testing.
 
-* Just run: `$ python3 run.py [n] [z] [mean] [max_events]`
-
-as an example: `$ python3 run.py 10 0.3 100`
-
 * Chart outputs are stored in the `output/` directory
 
-* To convert the charts into PNG images, run:
+In the source directory, run:  `python3 run.py [n] [z] [tm] [bm]`
 
-`$ python3 graphs.py`
+For eg: `python3 run.py 10 0.3 3 10`
+
+By default, simulations run for a maximum of 1000 events. 
+
+To change that pass `--until` parameter and to suppress printing of event log use `-q`:
+
+For eg: `python3 run.py 10 0.3 3 10 -q --until 5000`
 
 ---
 
