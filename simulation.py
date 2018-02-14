@@ -141,7 +141,7 @@ class Simulator(object):
         """Run all events until some max number of events."""
 
         events = Counter()
-        ev_count = 0
+        ev_count = 1
 
         if not quiet:
             print("     N |     t      |     Event")
@@ -166,6 +166,7 @@ class Simulator(object):
         print("\n\nCounts of events run: \n")
         for e, c in sorted(events.items()):
             print("{:<19} | {}".format(e, c))
+        print("{:^19} | {}".format("Total", ev_count - 1))
 
     def latency(self, a, b, msg_type):
         """Return latency between nodes a & b."""
