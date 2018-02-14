@@ -24,6 +24,9 @@ P.add_argument('bm', type=float, default=10,
 P.add_argument('--until', type=int, default=1000,
                help='Maximum number of events to run')
 
+P.add_argument('-q', action="store_true",
+               help='Do not print event log')
+
 if __name__ == '__main__':
 
     args = P.parse_args()
@@ -34,5 +37,6 @@ if __name__ == '__main__':
 
     sim = Simulator(args.n, args.z, args.tm, args.bm)
 
+    sim.run(args.until, args.q)
     sim.dump_network()
     sim.dump_node_chains()

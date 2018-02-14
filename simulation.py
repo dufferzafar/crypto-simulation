@@ -136,7 +136,7 @@ class Simulator(object):
 
             self.events.put(trns_gen)
 
-    def run(self, until=100):
+    def run(self, until=100, quiet=False):
         """Run all events until some max number of events."""
 
         ev_count = 0
@@ -146,7 +146,9 @@ class Simulator(object):
             ev = self.events.get()
             self.curr_time = ev.run_at
 
-            print("t=%.8f | " % self.curr_time, ev)
+            if not quiet:
+                print("%6d | t=%.8f | %s" % (ev_count, self.curr_time, ev))
+
             ev.run(self)
 
             ev_count += 1
