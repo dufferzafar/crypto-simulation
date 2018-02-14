@@ -44,8 +44,10 @@ class Node(object):
         # by_time = sorted(me.blocks.values(), key=lambda b: b.created_at)
         # longest_blk = sorted(by_time, key=lambda b: b.chain_len)
 
-        # Find the block ending with the longest chain
+        # Start with the genesis block
         longest_bk = self.blocks[0]
+
+        # Find the block ending with the longest chain
         for bk in self.blocks.values():
 
             # Use block creation time to break ties in case of equal length
@@ -56,7 +58,7 @@ class Node(object):
         # Now find all the blocks in this chain
         bk = longest_bk
 
-        # I hate while True loops but alas, python doesn't have do-while!
+        # Do-While Loop!
         while True:
 
             chain.append(bk)

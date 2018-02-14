@@ -222,8 +222,8 @@ class Simulator(object):
 
                 # Graphviz header format
                 # TODO: Stylish graph nodes etc. (lookup gdot documentation)
-                fh.write("digraph G { \n\n")
-                fh.write('rankdir="LR";')
+                fh.write("digraph G { \n")
+                fh.write('rankdir="LR";\n\n')
 
                 # Draw edges of the blockchain tree
                 for block in node.blocks.values():
