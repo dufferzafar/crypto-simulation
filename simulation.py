@@ -57,11 +57,6 @@ class Simulator(object):
         # Current time of the simulation
         self.curr_time = 0
 
-        # TODO: Rename to blk_rate
-        # TODO: Add similar for txn_rate
-        # Lambda value
-        self.lmbd = 10
-
         # Set propagation delays between each pair of nodes
         self.prop_delay = [
             # From assignment:

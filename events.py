@@ -67,7 +67,6 @@ class TransactionGenerate(Event):
         me.transactions[new_trans.id] = new_trans
 
         # Create a next transaction event for this node
-        # TODO: Create a separate function in sim for transaction_delay
         sim.events.put(TransactionGenerate(
             me.id,
             me.id,
@@ -140,7 +139,6 @@ class BlockGenerate(Event):
         # Hi, this is me!
         me = sim.nodes[self.node_id]
 
-        # TODO: 0 - Learn why we need receivedStamps
         for x in me.receivedStamps:
             if x > self.run_at:
                 return
@@ -215,12 +213,10 @@ class BlockReceive(Event):
 
         # Find previous block to the one that we've just received
         prev_blk = me.blocks.get(self.block.prev_block_id)
-
-        # TODO: Why would I not have received the previous block?
         if prev_blk is None:
             return
 
-        # TODO: ? Add transactions in this block to my list of seen ones
+        # Add transactions in this block to my list of seen ones
         me.transactions.update(self.block.transactions)
 
         # Make a copy of the block to increase the length
@@ -234,10 +230,7 @@ class BlockReceive(Event):
 
         # Add the block to my chain
         me.blocks[new_blk.id] = new_blk
-
-        # TODO:
-        me.receivedStamps.append(self.run_at)
-        # me.receivedStamps.append(new_blk.created_at)
+        me.receivedStamps.append(new_blk.created_at)
 
         # Generate BlockReceive events for all my peers
         for peer in me.peers:
@@ -255,7 +248,6 @@ class BlockReceive(Event):
                     self.run_at + t
                 ))
 
-        # TODO: ? - Do we need a schedule time value to be passed as well?
         # Create a new block generation event for me
         sim.events.put(BlockGenerate(
             me.id,
