@@ -27,6 +27,9 @@ P.add_argument('--until', type=int, default=1000,
 P.add_argument('-q', action="store_true",
                help='Do not print event log')
 
+P.add_argument('--network', action="store_true",
+               help='Dump network graph (may take a long time!)')
+
 if __name__ == '__main__':
 
     args = P.parse_args()
@@ -43,8 +46,9 @@ if __name__ == '__main__':
     print("\n >>>> Running simulation \n")
     sim.run(args.until, args.q)
 
-    print("\n >>>> Dumping network graph ")
-    sim.dump_network()
+    if args.network:
+        print("\n >>>> Dumping network graph ")
+        sim.dump_network()
 
     print("\n >>>> Dumping blockchains of all nodes ")
     sim.dump_node_chains()
