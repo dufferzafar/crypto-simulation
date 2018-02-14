@@ -23,13 +23,19 @@ if not os.path.isdir(OUT_DIR):
 
 class Simulator(object):
 
-    def __init__(self, n, z):
+    def __init__(self, n, z, tm, bm):
 
         # Total number of nodes
         self.n = n
 
-        # Fraction of nodes that are slow
+        # Fraction of slow nodes
         self.z = z
+
+        # Mean transaction interarrival time
+        self.tm = tm
+
+        # Mean block interarrival time
+        self.bm = bm
 
         # The event queue prioritised by the scheduled time of the event
         self.events = PriorityQueue()
@@ -65,6 +71,14 @@ class Simulator(object):
 
         # Add some intial events
         self.seed_events_queue()
+
+    def transaction_delay(self):
+        """Use an exponential distribution for interarrival between transactions."""
+        return random.expovariate(1 / self.tm)
+
+    def block_delay(self):
+        """Use an exponential distribution for interarrival between blocks."""
+        return random.expovariate(1 / self.bm)
 
     def create_nodes(self, n, z):
         """Create n nodes z% of which are slow."""

@@ -18,6 +18,7 @@ P.add_argument('tm', type=float, default=5,
                help='Mean transaction interarrival time')
 
 P.add_argument('bm', type=float, default=10,
+               # metavar="Tk",
                help='Mean block interarrival time')
 
 P.add_argument('--until', type=int, default=1000,
@@ -31,9 +32,7 @@ if __name__ == '__main__':
     if args.z > 1:
         args.z /= 100
 
-    sim = Simulator(args.n, args.z)
-
-    sim.run(args.until)
-    sim.dump_node_chains()
+    sim = Simulator(args.n, args.z, args.tm, args.bm)
 
     sim.dump_network()
+    sim.dump_node_chains()

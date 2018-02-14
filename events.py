@@ -68,12 +68,11 @@ class TransactionGenerate(Event):
 
         # Create a next transaction event for this node
         # TODO: Create a separate function in sim for transaction_delay
-        t = random.expovariate(sim.lmbd)
         sim.events.put(TransactionGenerate(
             me.id,
             me.id,
             self.run_at,
-            self.run_at + t
+            self.run_at + sim.transaction_delay()
         ))
 
         # Create next transaction events for neighbours
@@ -249,7 +248,7 @@ class BlockReceive(Event):
         me.blocks[new_blk.id] = new_blk
 
         # TODO:
-        me.receivedStamps.append(sel.run_at)
+        me.receivedStamps.append(self.run_at)
         # me.receivedStamps.append(new_blk.created_at)
 
         # Generate BlockReceive events for all my peers
@@ -270,10 +269,9 @@ class BlockReceive(Event):
 
         # TODO: ? - Do we need a schedule time value to be passed as well?
         # Create a new block generation event for me
-        t = random.expovariate(sim.lmbd)
         sim.events.put(BlockGenerate(
             me.id,
             me.id,
             self.run_at,
-            self.run_at + t
+            self.run_at + sim.block_delay()
         ))
