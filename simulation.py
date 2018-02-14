@@ -112,25 +112,13 @@ class Simulator(object):
         """Seed the events queue with BlockGenerate & TransactionGenerate events."""
 
         for node in self.nodes:
-            t = random.expovariate(self.lmbd)
+            self.events.put(EV.BlockGenerate(
+                node.id, node.id, 0, self.block_delay()
+            ))
 
-            blk_gen = EV.BlockGenerate(
-                node.id,
-                node.id,
-                0,
-                t
-            )
-
-            self.events.put(blk_gen)
-
-            trns_gen = EV.TransactionGenerate(
-                node.id,
-                node.id,
-                0,
-                t
-            )
-
-            self.events.put(trns_gen)
+            self.events.put(EV.TransactionGenerate(
+                node.id, node.id, 0, self.transaction_delay()
+            ))
 
     def run(self, until=100, quiet=False):
         """Run all events until some max number of events."""
