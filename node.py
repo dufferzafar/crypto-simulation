@@ -40,6 +40,10 @@ class Node(object):
 
         chain = []
 
+        # Alternative way? https://stackoverflow.com/a/4233482/2043048
+        # by_time = sorted(me.blocks.values(), key=lambda b: b.created_at)
+        # longest_blk = sorted(by_time, key=lambda b: b.chain_len)
+
         # Find the block ending with the longest chain
         longest_bk = self.blocks[0]
         for bk in self.blocks.values():

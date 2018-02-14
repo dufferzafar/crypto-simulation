@@ -145,33 +145,21 @@ class BlockGenerate(Event):
             if x > self.run_at:
                 return
 
-        # by_time = sorted(me.blocks.values(), key=lambda b: b.created_at)
-        # longest_blk = sorted(by_time, key=lambda b: b.chain_len)
-
-        # Find the block ending with the longest chain
-        longest_blk = me.blocks[0]
-        for bk in me.blocks.values():
-
-            # Use block creation time to break ties in case of equal length
-            if ((len(bk) > len(longest_blk)) or ((len(bk) == len(longest_blk)) and
-                                                 (bk.created_at < longest_blk.created_at))):
-                longest_blk = bk
-
         # Traverse the longest chain and find all transactions that've been spent
+        longest_chain = me.longest_chain()
+        longest_blk = longest_chain[0]
+
         spent = set()
 
-        bk = longest_blk
-        while (bk.id != 0):  # Genesis blocks have id 0
-
+        for bk in longest_chain:
             # https://stackoverflow.com/a/7692347/2043048
             spent |= set(bk.transactions.values())
-            bk = me.blocks[bk.prev_block_id]
 
         # Unspent = Seen - Spent
         unspent_txns = set(me.transactions.values()) - spent
         unspent_txns = {t.id: t for t in unspent_txns}
 
-        # TODO: ? - Only create a block if I have transactions to send
+        # Only create a block if I have transactions to send
         if not unspent_txns:
             return
 
