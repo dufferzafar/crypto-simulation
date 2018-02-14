@@ -9,6 +9,7 @@ import os
 import random
 
 from queue import PriorityQueue
+from collections import Counter
 
 # Our custom code
 import events as EV
@@ -139,11 +140,12 @@ class Simulator(object):
     def run(self, until=100, quiet=False):
         """Run all events until some max number of events."""
 
+        events = Counter()
         ev_count = 0
 
         if not quiet:
             print("     N |     t      |     Event")
-            print("       |            | ")
+            print("       |            |")
 
         while ev_count <= until:
 
@@ -157,8 +159,13 @@ class Simulator(object):
 
             ev_count += 1
 
-        # TODO: Print stats on types of events run
-        # print("Total %d events were run." % ev_count)
+            # Keep track of which type of events run
+            ev_type = type(ev).__name__
+            events[ev_type] += 1
+
+        print("\n\nCounts of events run: \n")
+        for e, c in sorted(events.items()):
+            print("{:<19} | {}".format(e, c))
 
     def latency(self, a, b, msg_type):
         """Return latency between nodes a & b."""
@@ -290,7 +297,9 @@ class Simulator(object):
                 os.system(cmd)
 
     def remove_graphs(self):
-        """Remove all existing graph files."""
+        """
+        Remove all existing graph files.
+        """
 
         for fn in os.listdir(OUT_DIR):
             if fn.endswith(".dot") or fn.endswith(".png"):

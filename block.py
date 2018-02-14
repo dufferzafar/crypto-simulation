@@ -4,7 +4,6 @@ class Block(object):
     def __init__(self, block_id, created_at, creator_id, prev_block_id, chain_len):
         super(Block, self).__init__()
 
-        # TODO: Should this be passed from outside or auto-incremented by us?
         self.id = block_id
         self.created_at = created_at
 
