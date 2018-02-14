@@ -255,3 +255,28 @@ class Simulator(object):
                         fh.write("\t%d -- %d\n" % edge)
 
             fh.write("\n}")
+
+    def convert_graphs(self):
+        """
+        Convert all .dot files to .png files.
+        """
+
+        # TODO: Replace with glob.glob
+        for fn in os.listdir(OUT_DIR):
+
+            if fn.endswith(".dot"):
+
+                fn = os.path.join(OUT_DIR, fn)
+
+                graph = fn[:-4] + ".png"
+                cmd = "dot -Tpng %s -o %s" % (fn, graph)
+
+                # TODO: Replace with subprocess.call
+                os.system(cmd)
+
+    def remove_graphs(self):
+        """Remove all existing graph files."""
+
+        for fn in os.listdir(OUT_DIR):
+            if fn.endswith(".dot") or fn.endswith(".png"):
+                os.remove(os.path.join(OUT_DIR, fn))

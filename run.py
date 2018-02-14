@@ -37,6 +37,10 @@ if __name__ == '__main__':
 
     sim = Simulator(args.n, args.z, args.tm, args.bm)
 
+    sim.remove_graphs()
+
     sim.run(args.until, args.q)
     sim.dump_network()
     sim.dump_node_chains()
+
+    sim.convert_graphs()
