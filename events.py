@@ -165,7 +165,7 @@ class BlockGenerate(Event):
 
         # Generate a new block
         new_blk = Block(sim.block_id, self.run_at,
-                        me.id, longest_blk.id, len(longest_blk) + 1)
+                        me.id, longest_blk.id, len(longest_blk))
         new_blk.transactions.update(unspent_txns)
 
         sim.block_id += 1
